@@ -227,3 +227,15 @@ class TokenizerTrainer:
 
         logger.info("saved to %s", output_dir)
         return self.tokenizer
+
+
+def main(vocab_size=8192, special_tokens=["<bos>", "<eos>", "<pad>", "<unk>"]):
+    ds = load_dataset("roneneldan/TinyStories",split="train",streaming=True).take(300000)
+    tok = TokenizerTrainer(dataset=ds,config=TokenizerConfig(vocab_size=8192,special_tokens=special_tokens))
+    tokenizer = tok.train("./")
+
+
+if __name__ == "__main__":
+    vocab_size = 8192
+    special_tokens = ["<bos>","<eos>","<pad>","<unk>"]
+    main(vocab_size, special_tokens)
