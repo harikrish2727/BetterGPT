@@ -1,0 +1,1 @@
+{"model_max_length": 8192, "additional_special_tokens": [], "unk_token": "<unk>", "pad_token": "<pad>", "bos_token": "<bos>", "eos_token": "<eos>", "tokenizer_class": "PreTrainedTokenizerFast"}
