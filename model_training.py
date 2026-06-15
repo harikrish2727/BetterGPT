@@ -31,7 +31,7 @@ def training(
     model = model.to(device)
 
     checkpoint_path=os.path.join(save_path,"checkpoint.pt")
-    t_model.pt")best_path=os.path.join(save_path,"bes
+    best_path=os.path.join(save_path,"best_model.pt")
 
     #resume: weights + optimizer + scheduler + step. stream restarts.
     if resume_checkpoint is not None and os.path.exists(resume_checkpoint):
