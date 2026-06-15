@@ -2,8 +2,9 @@ import math
 
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 
-from model_config import ModelConfig
+from config import ModelConfig
 from transformer_block import TransformerBlock
 from positional_embeddings import RoPESplitHalf
 from layer_normalization import RMSNorm
@@ -77,3 +78,61 @@ class BetterGPT(nn.Module):
         x = self.lm_head(x)
 
         return x
+
+    @torch.no_grad()
+    def generate(self, idx, max_tokens, temp, top_k=None, eos_id=None):
+        self.eval()
+        B = idx.size(0)
+        finished = torch.zeros(B, 1, dtype=torch.bool, device=idx.device)
+
+        for _ in range(max_tokens):
+            idx_cond = idx[:, -self.seq_length:]
+            logits = self(idx_cond)[:, -1, :]
+
+            if temp == 0:
+                out_idx = torch.argmax(logits, dim=-1, keepdim=True)
+            else:
+                logits = logits / temp
+                if top_k is not None:
+                    k = min(top_k, logits.size(-1))
+                    val, _ = torch.topk(logits, k)
+                    min_val = val[:, -1].unsqueeze(-1)
+                    logits = logits.masked_fill(logits < min_val, float('-inf'))
+                probs = F.softmax(logits, dim=-1)
+                out_idx = torch.multinomial(probs, num_samples=1)
+
+            if eos_id is not None:
+                out_idx = torch.where(finished, torch.full_like(out_idx, eos_id), out_idx)
+                finished = finished | (out_idx == eos_id)
+
+            idx = torch.cat([idx, out_idx], dim=1)
+
+            if eos_id is not None and finished.all():
+                break
+
+        return idx
+
+    @torch.no_grad()
+    def generate_single(self, idx, max_tokens, temp, top_k=None, eos_id=None):
+        self.eval()
+        for _ in range(max_tokens):
+            idx_cond = idx[-self.seq_length:]
+            logits = self(idx_cond.unsqueeze(0))[:, -1, :]
+
+            if temp == 0:
+                out_idx = torch.argmax(logits, dim=-1).item()
+            else:
+                logits = logits / temp
+                if top_k is not None:
+                    k = min(top_k, logits.size(-1))
+                    val, _ = torch.topk(logits, k)
+                    min_val = val[:, -1].unsqueeze(-1)
+                    logits = logits.masked_fill(logits < min_val, float('-inf'))
+                probs = F.softmax(logits, dim=-1)
+                out_idx = torch.multinomial(probs, num_samples=1).item()
+
+            if eos_id is not None and out_idx == eos_id:
+                break
+
+            idx = torch.cat([idx, torch.tensor([out_idx], device=idx.device)], dim=0)
+        return idx
