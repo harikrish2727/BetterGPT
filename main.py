@@ -56,7 +56,7 @@ if __name__ == "__main__":
     
     parser = argparse.ArgumentParser()
     parser.add_argument("--text", type=str, required=True)
-    parser.add_argument("--max_tokens", type=int, default=100)
+    parser.add_argument("--max_tokens", type=int, default=500)
     parser.add_argument("--temp", type=float, default=0.4)
     parser.add_argument("--top_k", type=int, default=7)
     parser.add_argument("--stop_at_eos", type=bool, default=True)

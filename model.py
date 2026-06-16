@@ -22,7 +22,7 @@ class BetterGPT(nn.Module):
         hid = int(8*config.emb_dim/3)
         hid_dim = config.ffn_multiple*((hid+config.ffn_multiple-1)//config.ffn_multiple)
         head_dim = config.emb_dim//config.head_count
-
+        self.seq_length = config.seq_length
         assert head_dim % 2 == 0, (
             f"RoPE requires even head_dim, got {head_dim}"
             )

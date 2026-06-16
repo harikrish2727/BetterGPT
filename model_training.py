@@ -27,7 +27,7 @@ def training(
     step = 0
     best_val_loss = float("inf")
     window_loss = []
-
+    print(f"Training on {device} for {max_steps} steps...")
     model = model.to(device)
 
     checkpoint_path=os.path.join(save_path,"checkpoint.pt")
@@ -148,7 +148,7 @@ if __name__ == "__main__":
     # here I am using IterableDataset class, which doesn't have __len__ method, 
     # so calculating total steps based on total tokens and batch size and seq length
 
-    total_steps = TrainingConfig().token_count / (TrainingConfig().batch_size * ModelConfig().seq_length)  #total token/(batch*seq)
+    total_steps = int(TrainingConfig().token_count / (TrainingConfig().batch_size * ModelConfig().seq_length))  #total token/(batch*seq)
     warmup_steps = int(0.02 * total_steps)           # ~2%
 
     lr_scheduler = get_cosine_schedule_with_warmup(
