@@ -10,7 +10,7 @@ class ModelConfig:
     emb_dim: int = 512
     num_blocks: int = 8
     head_count: int = 8
-    seq_length: int = 1024
+    seq_length: int = 512
     ffn_multiple: int = 128
 
 

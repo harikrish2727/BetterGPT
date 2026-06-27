@@ -26,7 +26,7 @@ def training(
     step = 0
     best_val_loss = float("inf")
     window_loss = []
-
+    print(f"Training on {device} for {max_steps} steps...")
     model = model.to(device)
 
     checkpoint_path=os.path.join(save_path,"checkpoint.pt")
