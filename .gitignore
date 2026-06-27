@@ -8,6 +8,5 @@ wheels/
 
 # Virtual environments
 .venv
-data/
-model_checkpoints/
+
 
