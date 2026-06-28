@@ -5,7 +5,7 @@ import torch.nn.functional as F
 import torch.utils.checkpoint
 
 from src.model_files.transformer_block import TransformerBlock
-from src.model_files.positional_embeddings import RoPESplitHalf,RoPE_Interleave
+from src.model_files.positional_embeddings import RoPESplitHalf
 from src.model_files.layer_normalization import RMSNorm
 
 
@@ -96,7 +96,6 @@ class BetterGPT(PreTrainedModel,GenerationMixin):
     base_model_prefix = "model"
     _tied_weights_keys = {"lm_head.weight": "model.emb_layer.weight"}
     supports_gradient_checkpointing = True
-    
     def __init__(self, config: BetterGPTConfig):
         # Call the HF PreTrainedModel init
         super().__init__(config) 
