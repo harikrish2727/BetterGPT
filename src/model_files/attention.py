@@ -16,10 +16,10 @@ class RopeAttention(nn.Module):
 
         self.out_proj = nn.Linear(emb_dim,emb_dim,bias=False)
 
-        self.register_buffer("mask",
-            torch.tril(torch.ones(seq_length, seq_length)),
-            persistent=False
-        )
+        # self.register_buffer("mask",
+        #     torch.tril(torch.ones(seq_length, seq_length)),
+        #     persistent=False
+        # )
 
 
     def forward(self,x,attention_mask):
@@ -39,24 +39,27 @@ class RopeAttention(nn.Module):
         # print(f"rotated shape q {rotated_q.shape},k {rotated_k.shape}")
         # drop_out_p = self.attn_dropout if self.training else 0.0
 
-        mask = self.mask[:seq_length,:seq_length].bool()
+        # mask = self.mask[:seq_length,:seq_length].bool()
 
         if attention_mask is not None:
             # print("attention mask")
-            attention_mask = attention_mask.bool().unsqueeze(1).unsqueeze(1)
-            combined_mask = attention_mask & mask
-        else:
-            # print("causal mask")
-            combined_mask = mask
+            # attention_mask = attention_mask.bool().unsqueeze(1).unsqueeze(1)
+            # combined_mask = attention_mask & mask
+            # attn_bias = torch.zeros_like(combined_mask, dtype=q.dtype)
+            # attn_bias.masked_fill_(~combined_mask, torch.finfo(q.dtype).min)
+            # y = scaled_dot_product_attention(rotated_q,rotated_k,v,attn_mask=attn_bias,is_causal=False)
 
-        y = scaled_dot_product_attention(
-            rotated_q,
-            rotated_k,
-            v,
-            attn_mask=combined_mask,
-            enable_gqa=False,
-            is_causal=False
-            )
+            causal = torch.ones(seq_length, seq_length, device=x.device, dtype=torch.bool).tril()
+            pad = attention_mask.bool().unsqueeze(1).unsqueeze(1)
+            combined = pad & causal
+            attn_bias = torch.zeros_like(combined, dtype=q.dtype)
+            attn_bias.masked_fill_(~combined, torch.finfo(q.dtype).min)
+            y = scaled_dot_product_attention(rotated_q, rotated_k, v, attn_mask=attn_bias, is_causal=False)
+
+
+
+        else:
+            y = scaled_dot_product_attention(rotated_q,rotated_k,v,is_causal=True)
 
         y = y.transpose(1,2).contiguous()
 

@@ -5,11 +5,11 @@ import torch.nn.functional as F
 import torch.utils.checkpoint
 
 from src.model_files.transformer_block import TransformerBlock
-from src.model_files.positional_embeddings import RoPESplitHalf
+from src.model_files.positional_embeddings import RoPESplitHalf,RoPE_Interleave
 from src.model_files.layer_normalization import RMSNorm
 
 
-from transformers import PretrainedConfig, PreTrainedModel
+from transformers import PretrainedConfig, PreTrainedModel,GenerationMixin
 from transformers.modeling_outputs import CausalLMOutputWithPast, BaseModelOutputWithPast
 
 
@@ -24,8 +24,10 @@ class BetterGPTConfig(PretrainedConfig):
         head_count=8,
         seq_length=512,
         ffn_multiple=128,
+        tie_word_embeddings=True,
         **kwargs
     ):
+        assert emb_dim % head_count == 0, "emb_dim must be divisible by head_count"
         self.vocab_size = vocab_size
         self.emb_dim = emb_dim
         self.num_blocks = num_blocks
@@ -34,7 +36,7 @@ class BetterGPTConfig(PretrainedConfig):
         self.ffn_multiple = ffn_multiple
         
         # Initialize the Hugging Face base config
-        super().__init__(**kwargs)
+        super().__init__(tie_word_embeddings=tie_word_embeddings, **kwargs)
 
 
 
@@ -85,7 +87,7 @@ class BetterGPTModel(PreTrainedModel):
 
 
 
-class BetterGPT(PreTrainedModel):
+class BetterGPT(PreTrainedModel,GenerationMixin):
     """
     A small decoder-only language model adapted for Hugging Face Trainer compatibility.
     """
@@ -93,8 +95,8 @@ class BetterGPT(PreTrainedModel):
     config_class = BetterGPTConfig 
     base_model_prefix = "model"
     _tied_weights_keys = {"lm_head.weight": "model.emb_layer.weight"}
-    all_tied_weights_keys = {"lm_head.weight": "model.emb_layer.weight"}
     supports_gradient_checkpointing = True
+    
     def __init__(self, config: BetterGPTConfig):
         # Call the HF PreTrainedModel init
         super().__init__(config) 
@@ -106,14 +108,14 @@ class BetterGPT(PreTrainedModel):
         self.seq_length = config.seq_length
         self.lm_head = nn.Linear(config.emb_dim, config.vocab_size, bias=False)
 
-        
-        self.apply(self._init_weights)
+        # self.apply(self._init_weights)  hf post_init() calls this automatically
+        self.post_init()
 
         for name, p in self.named_parameters():
             if name.endswith("out_proj.weight") or name.endswith("down_proj.weight"):
                 nn.init.normal_(p, mean=0.0, std=0.02 / math.sqrt(2 * config.num_blocks))
 
-        self.lm_head.weight = self.model.emb_layer.weight    # weight tying
+        # self.lm_head.weight = self.model.emb_layer.weight    # weight tying
 
     def _init_weights(self, module):
         """weight initialization for Linear and embedding layers"""

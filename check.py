@@ -10,8 +10,7 @@ messages = [
     {"role": "system", "content": "you are a helpful assistant."},
     {"role": "user", "content": prompt},
     {"role":"assistant", "content": "LLMs are otherwise known as foundation models..."},
-    {"role":"user", "content": "What are they good at?"},
-    {"role":"assistant","content":"it is based on training data"}
+    {"role":"user", "content": "What are they good at?"}
 ]
 
 
@@ -31,35 +30,55 @@ if __name__ == "__main__":
 
     AutoConfig.register("better_gpt", BetterGPTConfig)
     AutoModelForCausalLM.register(BetterGPTConfig, BetterGPT)
+
     m1 = AutoModelForCausalLM.from_pretrained(path, low_cpu_mem_usage=False)
 
-    assert m1.lm_head.weight.data_ptr() == m1.model.emb_layer.weight.data_ptr()
+    
+
     m1.eval()
-    out1 = m1.custom_generate(ids, max_tokens=50, temp=0.7,top_k=50, eos_id=tokenizer.eos_token_id)
-    print(tokenizer.decode(out1[0], skip_special_tokens=False))
+    # m1 = AutoModelForCausalLM.from_pretrained(path, low_cpu_mem_usage=False)
+
+    # m1.eval()
+
     
     m2 = BetterGPT(BetterGPTConfig.from_pretrained(path))
     sd = st.load_file(path / "model.safetensors")
     result = m2.load_state_dict(sd, strict=False)
-    print(tokenizer.decode(out1[0], skip_special_tokens=False))
-    assert m2.lm_head.weight.data_ptr() == m2.model.emb_layer.weight.data_ptr()
+
+    
+    
+    # msgs = [{"role": "user", "content": "Name a popular author from the 21st Century."}]
+    # ids = tokenizer.apply_chat_template(msgs, add_generation_prompt=True, return_tensors="pt")
+    # out = m1.generate(ids, max_new_tokens=80, do_sample=False, use_cache=False,
+    #                 eos_token_id=tokenizer.eos_token_id,
+    #                 pad_token_id=tokenizer.pad_token_id or tokenizer.eos_token_id)
+    # print(tokenizer.decode(out[0], skip_special_tokens=False))
     
     m2.eval()
+
+
+ 
+
+    out = m1.generate(
+        ids,
+        max_new_tokens=100,
+        do_sample=False, temperature=0.7, top_k=50,
+        eos_token_id=tokenizer.eos_token_id,
+        pad_token_id=tokenizer.pad_token_id,
+        use_cache=False
+    )
+
+    print(tokenizer.decode(out[0], skip_special_tokens=False))
+
+    out1 = m2.custom_generate(ids,max_tokens=100,temp=0.7, top_k=50,
+        eos_id=tokenizer.eos_token_id)
+
+    # out1 = m1.custom_generate(ids,max_tokens=100,temp=0.7, top_k=50,
+    #     eos_id=tokenizer.eos_token_id)
+
+
     
-    out2 = m2.custom_generate(ids, max_tokens=50, temp=0.7,top_k=50, eos_id=tokenizer.eos_token_id)
     
-    print(tokenizer.decode(out2[0], skip_special_tokens=False))
-
-    # out = m1.generate(
-    #     ids,
-    #     max_new_tokens=100,
-    #     do_sample=True, temperature=0.7, top_k=50,
-    #     eos_token_id=tokenizer.eos_token_id,
-    #     pad_token_id=tokenizer.pad_token_id or tok.eos_token_id,
-    # )
-
-    # print(out)
-
-
+    print(tokenizer.decode(out1[0], skip_special_tokens=False))
     
 
