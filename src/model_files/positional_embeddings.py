@@ -22,7 +22,7 @@ class RoPE_Interleave(nn.Module):
 
         self.register_buffer("sin", sin)
         self.register_buffer("cos", cos)
-        print(self.sin.shape)
+        
 
     def rotate_half(self, x):
         even = x[..., 0::2]
@@ -55,8 +55,8 @@ class RoPESplitHalf(nn.Module):
         sin = torch.cat([angles.sin(), angles.sin()], dim=-1)
         cos = torch.cat([angles.cos(), angles.cos()], dim=-1)
 
-        self.register_buffer("sin", sin)
-        self.register_buffer("cos", cos)
+        self.register_buffer("sin", sin, persistent=False)
+        self.register_buffer("cos", cos, persistent=False)
 
     def rotate_half(self,x):
         x1, x2 = x.chunk(2, dim=-1)

@@ -11,7 +11,7 @@ chat_template = """
 {% generation %}{{ message['content'] }}{{ eos_token }}{% endgeneration %}
 {% endif %}
 {% endfor %}
-{% if add_generation_prompt %}<|im_start|>assistant
+{% if add_generation_prompt %}<|im_start|><|assistant|>
 {% endif %}
 """
 

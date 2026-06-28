@@ -22,7 +22,7 @@ class BetterGPTConfig(PretrainedConfig):
         emb_dim=512,
         num_blocks=8,
         head_count=8,
-        seq_length=1024,
+        seq_length=512,
         ffn_multiple=128,
         **kwargs
     ):
@@ -70,7 +70,6 @@ class BetterGPTModel(PreTrainedModel):
 
     def forward(self, input_ids=None, attention_mask=None, **kwargs):
         x = self.emb_layer(input_ids)
-        print("Input shape:", x.shape)
         for block in self.transformer_block:
             if self.gradient_checkpointing and self.training:
                 x = torch.utils.checkpoint.checkpoint(
@@ -92,8 +91,10 @@ class BetterGPT(PreTrainedModel):
     """
     
     config_class = BetterGPTConfig 
-    supports_gradient_checkpointing = True
     base_model_prefix = "model"
+    _tied_weights_keys = {"lm_head.weight": "model.emb_layer.weight"}
+    all_tied_weights_keys = {"lm_head.weight": "model.emb_layer.weight"}
+    supports_gradient_checkpointing = True
     def __init__(self, config: BetterGPTConfig):
         # Call the HF PreTrainedModel init
         super().__init__(config) 
@@ -122,6 +123,9 @@ class BetterGPT(PreTrainedModel):
                 nn.init.zeros_(module.bias)
         elif isinstance(module, nn.Embedding):
             nn.init.normal_(module.weight, mean=0.0, std=0.02)
+
+    def _tie_weights(self):
+        self.lm_head.weight = self.model.emb_layer.weight
 
     # TRL access the base model
     def get_decoder(self):
