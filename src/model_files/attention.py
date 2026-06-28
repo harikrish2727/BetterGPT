@@ -45,18 +45,11 @@ class RopeAttention(nn.Module):
             # print("attention mask")
             attention_mask = attention_mask.bool().unsqueeze(1).unsqueeze(1)
             combined_mask = attention_mask & mask
+            attn_bias = torch.zeros_like(combined_mask, dtype=q.dtype)
+            attn_bias.masked_fill_(~combined_mask, torch.finfo(q.dtype).min)
+            y = scaled_dot_product_attention(rotated_q,rotated_k,v,attn_mask=attn_bias,is_causal=False)
         else:
-            # print("causal mask")
-            combined_mask = mask
-
-        y = scaled_dot_product_attention(
-            rotated_q,
-            rotated_k,
-            v,
-            attn_mask=combined_mask,
-            enable_gqa=False,
-            is_causal=False
-            )
+            y = scaled_dot_product_attention(rotated_q,rotated_k,v,is_causal=True)
 
         y = y.transpose(1,2).contiguous()
 
