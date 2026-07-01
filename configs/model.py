@@ -3,6 +3,11 @@ from dataclasses import dataclass
 
 @dataclass
 class ModelConfig:
+    """Hyperparameters for the BetterGPT model architecture.
+
+    Validated at construction time: emb_dim must be divisible by head_count,
+    and the resulting head_dim must be even (required by RoPE).
+    """
     vocab_size: int = 8192
     emb_dim: int = 512
     num_blocks: int = 8

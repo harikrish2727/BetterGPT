@@ -9,6 +9,13 @@ logger = get_logger(__name__)
 
 
 class ShardDataset:
+    """Tokenize a HuggingFace streaming dataset and write it to binary shard files.
+
+    Token IDs are stored as uint16, limiting vocab_size to < 65 000.
+    Each shard holds buffer_size tokens packed contiguously; the final shard may
+    be smaller. Shards that already exist on disk are skipped.
+    """
+
     def __init__(
         self,
         dataset_name: str,
@@ -16,8 +23,17 @@ class ShardDataset:
         out_dir: str,
         split: str = "train",
         data_column_name: str = "text",
-        buffer_size: int = 20_000_000
+        buffer_size: int = 20_000_000,
     ):
+        """
+        Args:
+            dataset_name: HuggingFace dataset identifier (e.g. 'roneneldan/TinyStories').
+            tokenizer: Trained tokenizers.Tokenizer instance.
+            out_dir: Root output directory; shards are written under <out_dir>/<dataset>_data/.
+            split: Dataset split to process ('train', 'validation', etc.).
+            data_column_name: Column name that contains the raw text strings.
+            buffer_size: Number of tokens to accumulate before flushing one shard file.
+        """
         self.tokenizer = tokenizer
         self.dataset_name = dataset_name
         data_folder_name = f"{dataset_name.split('/')[-1]}_data"
@@ -34,12 +50,18 @@ class ShardDataset:
             )
 
     def save_shards(self, data_ids, shard_name):
+        """Write data_ids to a binary shard file, skipping if the file already exists."""
         shard_path = os.path.join(self.out_dir, shard_name)
         if not os.path.exists(shard_path):
             data_ids.tofile(shard_path)
             logger.info("Saved shard: %s", shard_name)
 
     def run(self, split):
+        """Tokenize the given dataset split and write token IDs to shard files.
+
+        Args:
+            split: Dataset split name to process ('train', 'validation', etc.).
+        """
         shard_id = 1
         buffer = np.empty(self.buffer_size, dtype=np.uint16)
         buffer_idx = 0

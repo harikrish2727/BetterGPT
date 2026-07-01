@@ -12,6 +12,25 @@ logger = get_logger("sample")
 
 def load_and_predict(text, model_path, tokenizer_path, device,
                      max_tokens=100, temp=0.4, top_k=7, stop_at_eos=True):
+    """Load a trained checkpoint and generate text for one or more prompts.
+
+    All prompts in `text` must encode to the same token length because the model
+    uses batched generation without a key-padding mask. For prompts of different
+    lengths, call this function once per prompt.
+
+    Args:
+        text: A single prompt string or a list of equal-length prompt strings.
+        model_path: Path to the .pt checkpoint file produced by the trainer.
+        tokenizer_path: Path to the tokenizer JSON file.
+        device: Torch device string ('cpu', 'cuda', etc.).
+        max_tokens: Maximum number of new tokens to generate per prompt.
+        temp: Sampling temperature; 0 for greedy decoding.
+        top_k: Restrict sampling to the top-k logits; None for unrestricted.
+        stop_at_eos: Stop generation when the <eos> token is produced.
+
+    Returns:
+        List of decoded output strings, one per prompt.
+    """
     if max_tokens <= 0:
         raise ValueError(f"max_tokens must be > 0, got {max_tokens}")
     if temp < 0:

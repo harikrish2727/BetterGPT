@@ -64,6 +64,7 @@ class BetterGPT(nn.Module):
         self.lm_head.weight = self.emb_layer.weight    # weight tying
 
     def _init_weights(self, module):
+        """Initialize Linear weights with N(0, 0.02) and zero biases; Embedding weights with N(0, 0.02)."""
         if isinstance(module, nn.Linear):
             nn.init.normal_(module.weight, mean=0.0, std=0.02)
             if module.bias is not None:
@@ -72,6 +73,15 @@ class BetterGPT(nn.Module):
             nn.init.normal_(module.weight, mean=0.0, std=0.02)
 
     def forward(self, input_dim, attention_mask=None):
+        """Run a forward pass through embedding → transformer blocks → RMSNorm → LM head.
+
+        Args:
+            input_dim: Token index tensor of shape (B, T).
+            attention_mask: Optional padding mask of shape (B, T); True = attend.
+
+        Returns:
+            Logits tensor of shape (B, T, vocab_size).
+        """
         x = self.emb_layer(input_dim)
         for block in self.transformer_block:
             x = block(x, attention_mask)
@@ -83,6 +93,21 @@ class BetterGPT(nn.Module):
 
     @torch.no_grad()
     def generate(self, idx, max_tokens, temp, top_k=None, eos_id=None):
+        """Generate tokens autoregressively for a batch of prompts.
+
+        Rows that produce eos_id keep emitting it as padding so the batch stays
+        rectangular; generation stops early when every row has finished.
+
+        Args:
+            idx: Prompt token indices of shape (B, T).
+            max_tokens: Maximum number of new tokens to append.
+            temp: Sampling temperature; 0 for greedy decoding.
+            top_k: If set, restrict sampling to the top-k logits.
+            eos_id: Token ID that signals end of sequence; None to disable.
+
+        Returns:
+            Token index tensor of shape (B, T + generated_length).
+        """
         if idx.dim() != 2:
             raise ValueError(f"generate() expects a 2-D input (B, T), got shape {tuple(idx.shape)}")
         if temp < 0:
@@ -134,6 +159,18 @@ class BetterGPT(nn.Module):
 
     @torch.no_grad()
     def generate_single(self, idx, max_tokens, temp, top_k=None, eos_id=None):
+        """Generate tokens autoregressively for a single prompt (no batch dimension).
+
+        Args:
+            idx: Prompt token indices of shape (T,).
+            max_tokens: Maximum number of new tokens to append.
+            temp: Sampling temperature; 0 for greedy decoding.
+            top_k: If set, restrict sampling to the top-k logits.
+            eos_id: Token ID that signals end of sequence; None to disable.
+
+        Returns:
+            Token index tensor of shape (T + generated_length,).
+        """
         if idx.dim() != 1:
             raise ValueError(f"generate_single() expects a 1-D input (T,), got shape {tuple(idx.shape)}")
         if temp < 0:

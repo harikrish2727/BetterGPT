@@ -3,6 +3,10 @@ import os
 
 
 def get_logger(name: str) -> logging.Logger:
+    """Return a named logger with a StreamHandler, creating handlers only once.
+
+    Level defaults to INFO; override with the LOG_LEVEL environment variable.
+    """
     logger = logging.getLogger(name)
     if not logger.handlers:
         handler = logging.StreamHandler()

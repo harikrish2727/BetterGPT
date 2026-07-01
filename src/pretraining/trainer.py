@@ -25,6 +25,28 @@ def training(
     resume_checkpoint=None,
     eval_every=500,
 ):
+    """Run the pretraining loop with periodic evaluation and checkpointing.
+
+    Checkpoints are written atomically (write to .tmp then rename). If a
+    resume_checkpoint is provided and exists, training continues from the saved
+    step; the data stream always restarts from the beginning.
+
+    Args:
+        model: BetterGPT model instance.
+        model_config: ModelConfig dataclass (serialized into checkpoints).
+        max_steps: Total number of optimizer steps to run.
+        train_loader: DataLoader for the training split (infinite IterableDataset).
+        val_loader: DataLoader for the validation split.
+        optimizer: Configured AdamW optimizer.
+        lr_scheduler: Learning rate scheduler (stepped every optimizer step).
+        device: Torch device string or torch.device.
+        save_path: Directory where checkpoint.pt and best_model.pt are written.
+        resume_checkpoint: Optional path to an existing checkpoint to resume from.
+        eval_every: Number of steps between validation evaluations.
+
+    Returns:
+        best_val_loss: Lowest validation loss recorded during training.
+    """
     step = 0
     best_val_loss = float("inf")
     window_loss = []

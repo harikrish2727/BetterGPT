@@ -8,6 +8,17 @@ logger = get_logger(__name__)
 
 @torch.no_grad()
 def evaluate(model, val_loader, device, max_batches=50):
+    """Compute average cross-entropy loss on the validation set.
+
+    Args:
+        model: BetterGPT model instance.
+        val_loader: DataLoader for the validation split.
+        device: Torch device string or torch.device.
+        max_batches: Maximum number of batches to evaluate; caps evaluation time.
+
+    Returns:
+        Average loss over evaluated batches, or float('inf') if the loader is empty.
+    """
     device_str = device if isinstance(device, str) else device.type
     model.eval()
     losses = []
