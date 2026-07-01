@@ -83,8 +83,8 @@ scripts/
 src/
 │
 ├── data_preparation/
-├── model_files/
-├── pre_training/
+├── models/
+├── pretraining/
 ├── finetuning/
 └── paths.py
 ```

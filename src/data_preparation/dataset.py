@@ -23,6 +23,16 @@ class TinyDataset(IterableDataset):
 
     def __init__(self, path, seq_length, split, shuffle_buffer=4096,
                  infinite=True, seed=1337):
+        """
+        Args:
+            path: Directory containing the binary shard files.
+            seq_length: Number of tokens per training window (input length).
+            split: Shard file prefix to glob for (e.g. 'train', 'validation').
+            shuffle_buffer: Reservoir size for the shuffle buffer; larger = more random.
+            infinite: If True, repeat indefinitely across epochs (for training).
+                      If False, yield each window exactly once (for evaluation).
+            seed: Base random seed; advanced per worker and per epoch to vary shuffling.
+        """
         super().__init__()
         self.data_files = sorted(glob(f"{path}/{split}*.bin"))
         self.seq_length = seq_length
@@ -33,6 +43,12 @@ class TinyDataset(IterableDataset):
             raise FileNotFoundError(f"No files found for split '{split}' in {path}")
 
     def _worker_files(self):
+        """Return the subset of shard files assigned to this DataLoader worker.
+
+        Returns:
+            Tuple of (files list, worker_id int). Single-process mode returns
+            all files with worker_id=0.
+        """
         info = get_worker_info()
         if info is None:
             return self.data_files, 0
@@ -40,6 +56,15 @@ class TinyDataset(IterableDataset):
         return files, info.id
 
     def _chunks_from_file(self, file, rng):
+        """Memory-map a shard file and yield shuffled (x, y) token windows.
+
+        Uses a try/finally to ensure the mmap is closed even if iteration is
+        interrupted. Windows smaller than seq_length+1 (too few tokens) are skipped.
+
+        Args:
+            file: Path to a binary uint16 shard file.
+            rng: random.Random instance for shuffling chunk order within the file.
+        """
         try:
             data = np.memmap(file, dtype=np.uint16, mode="r")
             n = len(data)
@@ -58,12 +83,24 @@ class TinyDataset(IterableDataset):
                 data._mmap.close()
 
     def _stream(self, files, rng):
+        """Yield chunks from all files in a randomly shuffled order.
+
+        Args:
+            files: List of shard file paths to stream from.
+            rng: random.Random instance controlling file-level shuffle order.
+        """
         file_order = list(files)
         rng.shuffle(file_order)
         for file in file_order:
             yield from self._chunks_from_file(file, rng)
 
     def __iter__(self):
+        """Iterate over token windows with reservoir-sampled shuffling.
+
+        In infinite mode, repeats across epochs with a fresh seed each epoch so
+        the shuffle order differs. In finite mode, flushes the remaining buffer
+        after exhausting the shards.
+        """
         files, worker_id = self._worker_files()
         if not files:
             return
