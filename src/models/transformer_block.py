@@ -2,9 +2,9 @@
 import torch
 import torch.nn as nn
 
-from src.model_files.swiglu_feed_forward import SwiGLU_FFN
-from src.model_files.attention import RopeAttention
-from src.model_files.layer_normalization import RMSNorm
+from src.models.swiglu_feed_forward import SwiGLU_FFN
+from src.models.attention import MHAttention
+from src.models.layer_normalization import RMSNorm
 
 class TransformerBlock(nn.Module):
     def __init__(
@@ -20,7 +20,7 @@ class TransformerBlock(nn.Module):
         super().__init__()
         self.pre_attn_norm = RMSNorm(emb_dim)
         self.pre_ffn_norm = RMSNorm(emb_dim)
-        self.attention = RopeAttention(
+        self.attention = MHAttention(
             emb_dim=emb_dim,
             head_dim=head_dim,
             head_count=head_count,

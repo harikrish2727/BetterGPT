@@ -1,17 +1,9 @@
 import torch
 from dataclasses import dataclass
+
 from src.paths import CHECKPOINT_DIR
 
 checkpoint_dir = CHECKPOINT_DIR
-
-@dataclass
-class ModelConfig:
-    vocab_size: int = 8192
-    emb_dim: int = 512
-    num_blocks: int = 8
-    head_count: int = 8
-    seq_length: int = 512
-    ffn_multiple: int = 128
 
 
 @dataclass
@@ -23,4 +15,11 @@ class TrainingConfig:
     eps: float = 1e-8
     device: str = "cuda" if torch.cuda.is_available() else "cpu"
     checkpoint_dir: str = checkpoint_dir
-    
+
+    def __post_init__(self):
+        if self.token_count <= 0:
+            raise ValueError(f"token_count must be > 0, got {self.token_count}")
+        if self.batch_size < 1:
+            raise ValueError(f"batch_size must be >= 1, got {self.batch_size}")
+        if self.learning_rate <= 0:
+            raise ValueError(f"learning_rate must be > 0, got {self.learning_rate}")
