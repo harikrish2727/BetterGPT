@@ -4,8 +4,8 @@ from typing import List, Optional
 
 @dataclass
 class TokenizerConfig:
-    vocab_size: int
     special_tokens: List[str]
+    vocab_size: int = 8192
     batch_size: int = 1000
     min_frequency: int = 2
     text_field: str = "text"

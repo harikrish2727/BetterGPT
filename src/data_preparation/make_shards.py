@@ -1,9 +1,13 @@
 import os
+from pathlib import Path
 import numpy as np
 from datasets import Dataset, load_dataset
 from tokenizers import Tokenizer
+from transformers import AutoTokenizer
 
 from src.logger import get_logger
+from configs.datashard import DatasetConfig
+from configs.tokenizer_config import TokenizerConfig
 
 logger = get_logger(__name__)
 
@@ -18,12 +22,11 @@ class ShardDataset:
 
     def __init__(
         self,
-        dataset_name: str,
-        tokenizer: Tokenizer,
-        out_dir: str,
-        split: str = "train",
-        data_column_name: str = "text",
-        buffer_size: int = 20_000_000,
+        dataset_name: str = DatasetConfig.dataset_name,
+        tokenizer_path: Tokenizer= DatasetConfig.tokenizer_path,
+        out_dir: Path = DatasetConfig.out_dir,
+        data_column_name: str = DatasetConfig.data_column_name,
+        buffer_size: int = DatasetConfig.buffer_size,
     ):
         """
         Args:
@@ -34,14 +37,14 @@ class ShardDataset:
             data_column_name: Column name that contains the raw text strings.
             buffer_size: Number of tokens to accumulate before flushing one shard file.
         """
-        self.tokenizer = tokenizer
+        self.tokenizer = AutoTokenizer.from_pretrained(tokenizer_path)
         self.dataset_name = dataset_name
         data_folder_name = f"{dataset_name.split('/')[-1]}_data"
         self.data_column_name = data_column_name
         self.out_dir = os.path.join(out_dir, data_folder_name)
         self.buffer_size = buffer_size
 
-        self.vocab_size = int(tokenizer.get_vocab_size())
+        self.vocab_size = int(TokenizerConfig.vocab_size)
         os.makedirs(self.out_dir, exist_ok=True)
 
         if self.vocab_size >= 65000:
@@ -65,14 +68,18 @@ class ShardDataset:
         shard_id = 1
         buffer = np.empty(self.buffer_size, dtype=np.uint16)
         buffer_idx = 0
-
-        ds = load_dataset(self.dataset_name, split=split, streaming=True).shuffle(seed=42, buffer_size=10_000)
+        
+        try:
+            ds = load_dataset(self.dataset_name, split=split, streaming=True).shuffle(seed=42, buffer_size=10_000)
+            logger.info("{self.dataset_name} dataset downloaded")
+        except Exception as e:
+            raise RuntimeError("dataset download failed!!!")
 
         for samples in ds.iter(1000):
-            encoded = self.tokenizer.encode_batch(samples[self.data_column_name])
+            encoded = self.tokenizer(samples[self.data_column_name])
 
-            for item in encoded:
-                ids = np.array(item.ids, dtype=np.uint16)
+            for item_ids in encoded["input_ids"]:
+                ids = np.array(item_ids, dtype=np.uint16)
                 start = 0
 
                 while start < len(ids):
@@ -86,14 +93,22 @@ class ShardDataset:
 
                     if buffer_idx == self.buffer_size:
                         shard_name = f"{split}_shard{shard_id:04d}.bin"
-                        self.save_shards(buffer, shard_name)
+                        try:
+                            self.save_shards(buffer, shard_name)
+                        except Exception as e:
+                            raise RuntimeError(f"data saving failed!!!")
 
                         if shard_id % 5 == 0:
                             logger.info("Progress: %d shards created", shard_id)
 
                         shard_id += 1
                         buffer_idx = 0
-
+        
         if buffer_idx > 0:
             shard_name = f"{split}_shard{shard_id:04d}.bin"
-            self.save_shards(buffer[:buffer_idx], shard_name)
+            try:
+                self.save_shards(buffer[:buffer_idx], shard_name)
+                logger.info("final shard saved")
+            except Exception as e:
+                logger.error("saving last shard failed")
+                raise RuntimeError("final shard saving failed")

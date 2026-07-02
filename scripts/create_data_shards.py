@@ -1,13 +1,22 @@
-from src.paths import DATA_DIR
 from tokenizers import Tokenizer
+from transformers import PreTrainedTokenizerFast, AutoTokenizer
+
+from src.paths import DATA_DIR,TOKENIZER_DIR
 from src.data_preparation.make_shards import ShardDataset
+from src.logger import get_logger
 
 
-tokenizer_path = "./tokenizer_checkpoint/tokenizer.json"
-data_path = DATA_DIR/"new"
+logger = get_logger(__name__)
+
+
+tokenizer_path = TOKENIZER_DIR/"updated-tokenizer"
+data_path = DATA_DIR
 
 if __name__ == "__main__":
-    tok = Tokenizer.from_file(tokenizer_path)
-    shards = ShardDataset(dataset_name="roneneldan/TinyStories",tokenizer=tok,out_dir=data_path)
+
+    shards = ShardDataset()
+    logger.info("starting data sharding...")
     shards.run("validation")
+    logger.info("validation shards created.")
     shards.run("train")
+    logger.info("training shards created.")

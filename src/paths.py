@@ -9,4 +9,4 @@ CHECKPOINT_DIR = ROOT_DIR / "model_checkpoints"
 
 TOKENIZER_DIR = ROOT_DIR / "tokenizer_checkpoint"
 
-DATA_DIR = ROOT_DIR / "data/TinyStories_data"
+DATA_DIR = ROOT_DIR / "data"

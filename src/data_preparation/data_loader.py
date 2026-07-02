@@ -8,7 +8,7 @@ from src.logger import get_logger
 
 logger = get_logger(__name__)
 
-path = DATA_DIR
+path = DATA_DIR/"TinyStories_data"
 pin_memory = torch.cuda.is_available()
 num_workers = 4 if torch.cuda.is_available() else 0
 
