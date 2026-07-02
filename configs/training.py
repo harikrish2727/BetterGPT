@@ -1,7 +1,7 @@
 import torch
 from dataclasses import dataclass
 
-from src.paths import CHECKPOINT_DIR
+from src.utils.paths import CHECKPOINT_DIR
 
 checkpoint_dir = CHECKPOINT_DIR
 

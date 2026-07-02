@@ -1,9 +1,8 @@
-import logging
 from datasets import load_dataset
-from src.paths import TOKENIZER_DIR
+from src.utils.paths import TOKENIZER_DIR
 from src.tokenizer import TokenizerTrainer
 from configs.tokenizer_config import TokenizerConfig
-from src.logger import get_logger
+from src.utils.logger import get_logger
 
 
 logger = get_logger(__name__)

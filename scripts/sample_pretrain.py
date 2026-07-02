@@ -4,8 +4,8 @@ from tokenizers import Tokenizer
 
 from configs.model import ModelConfig
 from configs.training import TrainingConfig
-from src.models.model import BetterGPT
-from src.logger import get_logger
+from src.models.base_model import BetterGPT
+from src.utils.logger import get_logger
 
 logger = get_logger("sample")
 

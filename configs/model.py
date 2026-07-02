@@ -1,39 +1,28 @@
-from dataclasses import dataclass
+from transformers import PretrainedConfig
 
 
-@dataclass
-class ModelConfig:
-    """Hyperparameters for the BetterGPT model architecture.
+class BetterGPTConfig(PretrainedConfig):
+    model_type = "better_gpt"
 
-    Validated at construction time: emb_dim must be divisible by head_count,
-    and the resulting head_dim must be even (required by RoPE).
-    """
-    vocab_size: int = 8192
-    emb_dim: int = 512
-    num_blocks: int = 8
-    head_count: int = 8
-    seq_length: int = 512
-    ffn_multiple: int = 128
+    def __init__(
+        self,
+        vocab_size=8192,
+        emb_dim=512,
+        num_blocks=8,
+        head_count=8,
+        seq_length=512,
+        ffn_multiple=128,
+        tie_word_embeddings=True,
+        rmsnorm_eps=1e-6,
+        **kwargs
+    ):
+        assert emb_dim % head_count == 0, "emb_dim must be divisible by head_count"
+        self.vocab_size = vocab_size
+        self.emb_dim = emb_dim
+        self.num_blocks = num_blocks
+        self.head_count = head_count
+        self.seq_length = seq_length
+        self.ffn_multiple = ffn_multiple
 
-    def __post_init__(self):
-        if self.vocab_size <= 0:
-            raise ValueError(f"vocab_size must be > 0, got {self.vocab_size}")
-        if self.emb_dim <= 0:
-            raise ValueError(f"emb_dim must be > 0, got {self.emb_dim}")
-        if self.head_count <= 0:
-            raise ValueError(f"head_count must be > 0, got {self.head_count}")
-        if self.emb_dim % self.head_count != 0:
-            raise ValueError(
-                f"emb_dim ({self.emb_dim}) must be divisible by head_count ({self.head_count})"
-            )
-        head_dim = self.emb_dim // self.head_count
-        if head_dim % 2 != 0:
-            raise ValueError(
-                f"head_dim ({head_dim}) must be even for RoPE; adjust emb_dim or head_count"
-            )
-        if self.num_blocks <= 0:
-            raise ValueError(f"num_blocks must be > 0, got {self.num_blocks}")
-        if self.seq_length <= 0:
-            raise ValueError(f"seq_length must be > 0, got {self.seq_length}")
-        if self.ffn_multiple <= 0:
-            raise ValueError(f"ffn_multiple must be > 0, got {self.ffn_multiple}")
+        # Initialize the Hugging Face base config
+        super().__init__(tie_word_embeddings=tie_word_embeddings, **kwargs)

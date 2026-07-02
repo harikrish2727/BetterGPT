@@ -5,7 +5,7 @@ from datasets import Dataset, load_dataset
 from tokenizers import Tokenizer
 from transformers import AutoTokenizer
 
-from src.logger import get_logger
+from src.utils.logger import get_logger
 from configs.datashard import DatasetConfig
 from configs.tokenizer_config import TokenizerConfig
 

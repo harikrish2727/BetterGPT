@@ -3,8 +3,8 @@ from src.data_preparation.dataset import TinyDataset
 from torch.utils.data import DataLoader
 from configs.model import ModelConfig
 from configs.training import TrainingConfig
-from src.paths import DATA_DIR
-from src.logger import get_logger
+from src.utils.paths import DATA_DIR
+from src.utils.logger import get_logger
 
 logger = get_logger(__name__)
 
