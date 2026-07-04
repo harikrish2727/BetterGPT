@@ -3,7 +3,7 @@ from tokenizers import Tokenizer
 from pathlib import Path
 
 
-from src.paths import TOKENIZER_DIR, DATA_DIR
+from src.utils.paths import TOKENIZER_DIR, DATA_DIR
 
 
 @dataclass

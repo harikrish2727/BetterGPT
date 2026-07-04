@@ -1,9 +1,9 @@
 from tokenizers import Tokenizer
 from transformers import PreTrainedTokenizerFast, AutoTokenizer
 
-from src.paths import DATA_DIR,TOKENIZER_DIR
+from src.utils.paths import DATA_DIR,TOKENIZER_DIR
 from src.data_preparation.make_shards import ShardDataset
-from src.logger import get_logger
+from src.utils.logger import get_logger
 
 
 logger = get_logger(__name__)
