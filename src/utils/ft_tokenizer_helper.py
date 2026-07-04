@@ -1,4 +1,7 @@
-from src.finetuning.template import chat_template
+from configs.template import chat_template
+from src.utils.logger import get_logger
+
+logger = get_logger(__name__)
 
 
 def prepare_tokenizer(tokenizer):

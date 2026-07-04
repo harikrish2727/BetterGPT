@@ -4,7 +4,7 @@ import torch.nn as nn
 from torch.nn.functional import scaled_dot_product_attention
 
 from src.models.positional_embeddings import RoPESplitHalf
-from configs.model import ModelConfig
+from configs.model import BetterGPTConfig as ModelConfig
 from src.utils.logger import get_logger
 from src.utils.rope_helper import rotate_half, apply_rotary_pos_emb
 
@@ -20,9 +20,9 @@ class MHAttention(nn.Module):
 
     def __init__(
             self, 
-            emb_dim: int= ModelConfig.emb_dim, 
-            head_count: int= ModelConfig.head_count, 
-            head_dim: int= ModelConfig.head_dim
+            emb_dim: int, 
+            head_count: int, 
+            head_dim: int
             ):
         """
         Args:

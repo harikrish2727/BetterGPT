@@ -12,7 +12,7 @@ def load_model(saved_model_path,tokenizer):
     It will remap the state dict to match the new model structure and resize the token embeddings to match the tokenizer size.
     """
     model = BetterGPT(ModelConfig())
-    ckpt = torch.load(saved_model_path/"model.pt", map_location="cpu", weights_only=True)  #sft trainer needs cpu, it will load to gpu later
+    ckpt = torch.load(saved_model_path, map_location="cpu", weights_only=True)  #sft trainer needs cpu, it will load to gpu later
     old_state_dict = ckpt["model_state"]
 
     new_state_dict = {}
@@ -39,3 +39,10 @@ def load_model(saved_model_path,tokenizer):
     assert model.lm_head.weight.data_ptr() == model.model.emb_layer.weight.data_ptr(), "tie broke after resize"
     logger.info(f"vocab: {model.lm_head.weight.shape[0]} == {len(tokenizer)}")
     return model
+
+if __name__ == "__main__":
+    tokenizer_path = "./tokenizer_checkpoint"
+    model_path = "./checkpoints/model.pt"
+    from transformers import PreTrainedTokenizerFast
+    tokenizer = PreTrainedTokenizerFast.from_pretrained(tokenizer_path)
+    model = load_model(model_path, tokenizer)

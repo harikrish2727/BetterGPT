@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 
-from configs.model import ModelConfig
+from configs.model import BetterGPTConfig as ModelConfig
 
 class RMSNorm(nn.Module):
     """Root Mean Square Layer Normalization.
@@ -11,7 +11,7 @@ class RMSNorm(nn.Module):
     avoid precision loss with bfloat16 inputs.
     """
 
-    def __init__(self, emb_dim, eps: float = ModelConfig.rmsnorm_eps):
+    def __init__(self, emb_dim, eps: float = ModelConfig().rmsnorm_eps):
         """
         Args:
             emb_dim: Size of the last dimension to normalize over.

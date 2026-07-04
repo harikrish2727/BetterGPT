@@ -4,7 +4,7 @@ import torch.nn as nn
 from src.models.swiglu_feed_forward import SwiGLU_FFN
 from src.models.attention import MHAttention
 from src.models.layer_normalization import RMSNorm
-from configs.model import ModelConfig
+from configs.model import BetterGPTConfig as ModelConfig
 from src.utils.logger import get_logger
 
 logger = get_logger(__name__)
@@ -20,10 +20,11 @@ class TransformerBlock(nn.Module):
 
     def __init__(
             self, 
-            emb_dim:int = ModelConfig.emb_dim, 
-            hid_dim:int = ModelConfig.hid_dim, 
-            head_count:int = ModelConfig.head_count, 
-            head_dim:int = ModelConfig.head_dim):
+            emb_dim:int, 
+            hid_dim:int, 
+            head_count:int = ModelConfig().head_count, 
+            head_dim:int = ModelConfig().head_dim
+            ):
         """
         Args:
             emb_dim: Model embedding dimension.
@@ -58,3 +59,4 @@ class TransformerBlock(nn.Module):
         x = x + self.ffn(self.pre_ffn_norm(x))
         logger.debug(f"Output shape: {x.shape}")
         return x
+

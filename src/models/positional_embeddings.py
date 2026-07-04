@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 
-from configs.model import ModelConfig
+from configs.model import BetterGPTConfig as ModelConfig
 
 
 class RoPESplitHalf(nn.Module):
@@ -10,9 +10,7 @@ class RoPESplitHalf(nn.Module):
     half with the negated second half. compute sin/cos tables on the fly up to
     seq_len of each batch.
     """
-    def __init__(self, 
-                 head_dim: int = ModelConfig.head_dim,
-                 base: int = ModelConfig.rope_base):
+    def __init__(self, head_dim: int, base: float):
         """
         Args:
             head_dim: Per-head dimension; must be even.
@@ -40,4 +38,8 @@ class RoPESplitHalf(nn.Module):
             self._cos_cached, self._sin_cached = emb.cos(), emb.sin()
             self._cached_len = seq_len
         return self._cos_cached[:seq_len], self._sin_cached[:seq_len]
-
+    
+if __name__ == "__main__":
+    # config = ModelConfig()
+    print(f"RoPESplitHalf: head_dim={ModelConfig().head_dim}, rope_base={ModelConfig().rope_base}")
+    # RoPE = RoPESplitHalf(head_dim=config.head_dim, base=config.rope_base)
