@@ -1,12 +1,15 @@
+"""
+class to create Multi-head self-attention with Rotary Position Embeddings (RoPE),
+using pytorch SDPA class.
 
+"""
 import torch
-import torch.nn as nn
+
+from torch import nn
 from torch.nn.functional import scaled_dot_product_attention
 
-from src.models.positional_embeddings import RoPESplitHalf
-from configs.model import BetterGPTConfig as ModelConfig
 from src.utils.logger import get_logger
-from src.utils.rope_helper import rotate_half, apply_rotary_pos_emb
+from src.utils.rope_helper import apply_rotary_pos_emb
 
 logger = get_logger(__name__)
 
@@ -19,9 +22,9 @@ class MHAttention(nn.Module):
     """
 
     def __init__(
-            self, 
-            emb_dim: int, 
-            head_count: int, 
+            self,
+            emb_dim: int,
+            head_count: int,
             head_dim: int
             ):
         """
@@ -37,7 +40,6 @@ class MHAttention(nn.Module):
 
         self.qkv_proj = nn.Linear(emb_dim, 3 * emb_dim, bias=False)
         self.out_proj = nn.Linear(emb_dim, emb_dim, bias=False)
-
 
     def forward(self, x, sin, cos, attention_mask=None):
         """Apply multi-head attention with RoPE and an optional padding mask.
@@ -62,7 +64,9 @@ class MHAttention(nn.Module):
 
         logger.debug(f"q shape: {q.shape}, k shape: {k.shape}, v shape: {v.shape}")
         logger.debug(f"sin shape: {sin.shape}, cos shape: {cos.shape}")
-        logger.debug(f"attention_mask shape: {attention_mask.shape if attention_mask is not None else 'None'}")
+        logger.debug(f"attention_mask shape: {
+            attention_mask.shape if attention_mask is not None else 'None'}"
+            )
 
         rotated_q, rotated_k = apply_rotary_pos_emb(q, k, cos, sin)
 
@@ -77,7 +81,7 @@ class MHAttention(nn.Module):
             # Combine: mask positions that are padding OR in the future
             # causal_mask: [seq_len, seq_len] -> [1, 1, seq_len, seq_len]
             combined_mask = causal_mask.unsqueeze(0).unsqueeze(0) | (~padding_mask)
-            # combined_mask is True where attention should be BLOCKED
+            #combined_mask is True where attention should be BLOCKED
 
             attn_bias = torch.zeros(batch, 1, seq_length, seq_length, device=x.device, dtype=q.dtype)
             attn_bias.masked_fill_(combined_mask, torch.finfo(q.dtype).min)
