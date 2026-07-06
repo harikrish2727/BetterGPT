@@ -18,7 +18,7 @@ from src.utils.logger import get_logger
 
 logger = get_logger(__name__)
 
-model_path = CHECKPOINT_DIR
+model_path = "model_checkpoints/best_model.pt"
 tokenizer_path = TOKENIZER_DIR
 
 
