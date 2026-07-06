@@ -11,7 +11,7 @@ from configs.ft_config import sft_config
 from src.utils.model_loader import load_model
 from src.utils.ft_tokenizer_helper import prepare_tokenizer
 from src.utils.prepare_alpaca_dataset import convert_alpaca_format
-from src.utils.paths import CHECKPOINT_DIR, TOKENIZER_DIR
+from src.utils.paths import TOKENIZER_DIR
 from src.utils.data_splitter import split_dataset
 from src.utils.logger import get_logger
 

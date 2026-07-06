@@ -43,7 +43,7 @@ def generate(ids:torch.tensor):
         )
         
     except ValueError as e:
-        logger.debug("error in generating output {e}")
+        logger.debug(f"error in generating output {e}")
 
     return out
 
