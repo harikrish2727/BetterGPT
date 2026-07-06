@@ -17,8 +17,9 @@ from configs.tokenizer_config import TokenizerConfig
 
 logger = logging.getLogger(__name__)
 
-SPLIT_PATTERN = r"""'s|'t|'re|'ve|'m|'ll|'d| ?\p{L}+| ?\p{N}+| ?[^\s\p{L}\p{N}]+|\s+(?!\S)|\s+"""
-
+SPLIT_PATTERN = (
+    r"""'s|'t|'re|'ve|'m|'ll|'d| ?\p{L}+| ?\p{N}+| ?[^\s\p{L}\p{N}]+|\s+(?!\S)|\s+"""
+)
 
 
 ROUND_TRIP_TESTS = [
@@ -31,7 +32,6 @@ ROUND_TRIP_TESTS = [
     "numbers 3.14159 1,000,000 -42 1e-9",
     "\n\nnewlines\tand\ttabs\n",
 ]
-
 
 
 class TokenizerTrainer:
@@ -89,13 +89,16 @@ class TokenizerTrainer:
         Returns:
             A configured but untrained :class:`Tokenizer` instance.
         """
-        logger.debug("building byte-level BPE tokenizer (unk_token=%r)",
-                     self.config.unk_token)
+        logger.debug(
+            "building byte-level BPE tokenizer (unk_token=%r)", self.config.unk_token
+        )
         tok = Tokenizer(BPE(unk_token=self.config.unk_token))
-        tok.pre_tokenizer = Sequence([
-            Split(Regex(SPLIT_PATTERN), behavior="isolated"),
-            ByteLevel(add_prefix_space=False, use_regex=False),
-        ])
+        tok.pre_tokenizer = Sequence(
+            [
+                Split(Regex(SPLIT_PATTERN), behavior="isolated"),
+                ByteLevel(add_prefix_space=False, use_regex=False),
+            ]
+        )
         tok.decoder = ByteLevelDecoder()
         return tok
 
@@ -176,16 +179,16 @@ class TokenizerTrainer:
         eos_id = self.tokenizer.token_to_id(eos)
         if bos_id is None or eos_id is None:
             raise RuntimeError(
-                f"bos/eos missing from trained vocab: "
-                f"{bos}={bos_id}, {eos}={eos_id}"
+                f"bos/eos missing from trained vocab: {bos}={bos_id}, {eos}={eos_id}"
             )
         self.tokenizer.post_processor = TemplateProcessing(
             single=f"{bos} $A {eos}",
             pair=f"{bos} $A {eos} {bos} $B:1 {eos}:1",
             special_tokens=[(bos, bos_id), (eos, eos_id)],
         )
-        logger.info("attached post-processor (bos=%s:%d, eos=%s:%d)",
-                    bos, bos_id, eos, eos_id)
+        logger.info(
+            "attached post-processor (bos=%s:%d, eos=%s:%d)", bos, bos_id, eos, eos_id
+        )
 
     def _verify_round_trip(self) -> None:
         """Verify encode/decode is lossless on a set of edge-case phrases.
@@ -221,8 +224,10 @@ class TokenizerTrainer:
         for t in self.config.special_tokens:
             if self.tokenizer.token_to_id(t) is None:
                 raise RuntimeError(f"special token {t!r} missing from vocab")
-        logger.info("verified %d special tokens present in vocab",
-                    len(self.config.special_tokens))
+        logger.info(
+            "verified %d special tokens present in vocab",
+            len(self.config.special_tokens),
+        )
 
     def _save_hf(self, raw_tokenizer_path: str, save_dir: str) -> None:
         """Wrap the raw tokenizer as a HuggingFace tokenizer and save it.
@@ -319,7 +324,9 @@ class TokenizerTrainer:
 
         logger.info("saving tokenizer artifacts to %s", output_dir)
         try:
-            with tempfile.TemporaryDirectory(dir=os.path.dirname(output_dir) or ".") as tmp:
+            with tempfile.TemporaryDirectory(
+                dir=os.path.dirname(output_dir) or "."
+            ) as tmp:
                 logger.debug("staging artifacts in temp dir %s", tmp)
                 raw_path = os.path.join(tmp, "tokenizer.json")
                 self.tokenizer.save(raw_path)
@@ -343,5 +350,3 @@ class TokenizerTrainer:
 
         logger.info("saved to %s", output_dir)
         return self.tokenizer
-
-

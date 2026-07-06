@@ -14,7 +14,8 @@ from src.utils.paths import CHECKPOINT_DIR, TOKENIZER_DIR
 
 logger = get_logger("sample")
 
-model_path = CHECKPOINT_DIR/"best_model.pt"
+model_path = CHECKPOINT_DIR / "best_model.pt"
+
 
 def load_and_predict(text, device, max_tokens=100, temp=0.4, top_k=7, stop_at_eos=True):
     """Load a trained checkpoint and generate text for one or more prompts.
@@ -42,7 +43,9 @@ def load_and_predict(text, device, max_tokens=100, temp=0.4, top_k=7, stop_at_eo
         raise ValueError(f"top_k must be > 0, got {top_k}")
 
     tokenizer = PreTrainedTokenizerFast.from_pretrained(TOKENIZER_DIR)
-    eos_id = tokenizer.token_to_id("<eos>") if stop_at_eos else None #check this call works for fast tokenizer
+    eos_id = (
+        tokenizer.token_to_id("<eos>") if stop_at_eos else None
+    )  # check this call works for fast tokenizer
 
     ckpt = torch.load(model_path, map_location=device, weights_only=True)
     model = BetterGPT(ModelConfig(**ckpt["model_config"]))
@@ -64,7 +67,7 @@ def load_and_predict(text, device, max_tokens=100, temp=0.4, top_k=7, stop_at_eo
     for enc in enc_batch:
         ids = enc.ids
         if eos_id is not None and ids and ids[-1] == eos_id:
-            ids = ids[:-1]    # drop trailing eos token
+            ids = ids[:-1]  # drop trailing eos token
         seqs.append(ids)
 
     lengths = {len(s) for s in seqs}
@@ -74,8 +77,9 @@ def load_and_predict(text, device, max_tokens=100, temp=0.4, top_k=7, stop_at_eo
     )
 
     idx = torch.tensor(seqs, device=device)
-    out = model.generate(idx, max_tokens=max_tokens, temp=temp,
-                         top_k=top_k, eos_id=eos_id)
+    out = model.generate(
+        idx, max_tokens=max_tokens, temp=temp, top_k=top_k, eos_id=eos_id
+    )
     return tokenizer.decode_batch(out.tolist(), skip_special_tokens=True)
 
 

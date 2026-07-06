@@ -1,4 +1,3 @@
-import math
 import torch
 import os
 
@@ -73,14 +72,17 @@ def training(
     def save_ckpt(path):
         tmp = f"{path}.tmp"
         try:
-            torch.save({
-                "step": step,
-                "model_config": asdict(model_config),
-                "model_state": model.state_dict(),
-                "optimizer_state": optimizer.state_dict(),
-                "scheduler_state": lr_scheduler.state_dict(),
-                "best_val_loss": best_val_loss,
-            }, tmp)
+            torch.save(
+                {
+                    "step": step,
+                    "model_config": asdict(model_config),
+                    "model_state": model.state_dict(),
+                    "optimizer_state": optimizer.state_dict(),
+                    "scheduler_state": lr_scheduler.state_dict(),
+                    "best_val_loss": best_val_loss,
+                },
+                tmp,
+            )
             os.replace(tmp, path)
         except OSError as e:
             logger.error("Failed to save checkpoint to %s: %s", path, e)
@@ -103,18 +105,25 @@ def training(
 
         optimizer.zero_grad(set_to_none=True)
         try:
-            with torch.amp.autocast(device_type=device_str, dtype=torch.bfloat16, enabled=(device_str == "cuda")):
+            with torch.amp.autocast(
+                device_type=device_str,
+                dtype=torch.bfloat16,
+                enabled=(device_str == "cuda"),
+            ):
                 logits = model(input_seq).logits
                 B, T, V = logits.shape
                 loss = F.cross_entropy(logits.view(B * T, V), tar_seq.view(B * T))
 
             if loss.isnan() or loss.isinf():
-                raise RuntimeError(f"Loss is {loss.item()} at step {step} — training has diverged.")
+                raise RuntimeError(
+                    f"Loss is {loss.item()} at step {step} — training has diverged."
+                )
 
             loss.backward()
         except torch.cuda.OutOfMemoryError:
             logger.error(
-                "CUDA out of memory at step %d. Consider reducing batch_size or seq_length.", step
+                "CUDA out of memory at step %d. Consider reducing batch_size or seq_length.",
+                step,
             )
             raise
 
@@ -131,8 +140,12 @@ def training(
             avg_train = sum(window_loss) / len(window_loss)
             logger.info(
                 "Step %d/%d | train_loss=%.4f | val_loss=%.4f | grad_norm=%.4f | lr=%.2e",
-                step, max_steps, avg_train, val_loss,
-                grad_norm, optimizer.param_groups[0]["lr"],
+                step,
+                max_steps,
+                avg_train,
+                val_loss,
+                grad_norm,
+                optimizer.param_groups[0]["lr"],
             )
 
             save_ckpt(checkpoint_path)
@@ -149,7 +162,9 @@ def training(
         avg_train = sum(window_loss) / len(window_loss)
         logger.info(
             "Final step %d | train_loss=%.4f | val_loss=%.4f",
-            step, avg_train, val_loss,
+            step,
+            avg_train,
+            val_loss,
         )
         save_ckpt(checkpoint_path)
         if val_loss < best_val_loss:

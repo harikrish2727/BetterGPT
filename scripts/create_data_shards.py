@@ -1,8 +1,8 @@
 """
-This script is responsible for creating data shards from the dataset. 
-It uses the ShardDataset class to process the data and create shards for both 
+This script is responsible for creating data shards from the dataset.
+It uses the ShardDataset class to process the data and create shards for both
 training and validation datasets.
-The shards are created in the specified data directory, 
+The shards are created in the specified data directory,
 and the tokenizer is loaded from the specified tokenizer
 """
 
@@ -16,6 +16,7 @@ logger = get_logger(__name__)
 
 data_path = DATA_DIR
 
+
 def main():
     """
     Main function to create data shards for training and validation datasets.
@@ -27,6 +28,7 @@ def main():
     logger.info("validation shards created.")
     shards.run("train")
     logger.info("training shards created.")
+
 
 if __name__ == "__main__":
     main()

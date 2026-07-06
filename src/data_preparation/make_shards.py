@@ -1,12 +1,12 @@
-""""
-This module provides functionality to tokenize a HuggingFace streaming dataset and 
+""" "
+This module provides functionality to tokenize a HuggingFace streaming dataset and
 write it to binary shard files.
 Token IDs are stored as uint16, limiting vocab_size to < 65 000.
-Each shard holds buffer_size tokens packed contiguously; 
+Each shard holds buffer_size tokens packed contiguously;
 the final shard may be smaller. Shards that already exist on disk are skipped.
-The ShardDataset class is responsible for processing the dataset and 
-creating shards for both training and validation datasets. 
-The shards are created in the specified data directory, 
+The ShardDataset class is responsible for processing the dataset and
+creating shards for both training and validation datasets.
+The shards are created in the specified data directory,
 and the tokenizer is loaded from the specified tokenizer path."""
 
 import os
@@ -76,10 +76,12 @@ class ShardDataset:
             split: Dataset split name to process ('train', 'validation', etc.).
         """
         shard_id = 1
-        buffer = np.empty(self.buffer_size, dtype=np.uint16)  #creating buffer
-        buffer_idx = 0        
+        buffer = np.empty(self.buffer_size, dtype=np.uint16)  # creating buffer
+        buffer_idx = 0
         try:
-            ds = load_dataset(self.dataset_name, split=split, streaming=True).shuffle(seed=42, buffer_size=10_000)
+            ds = load_dataset(self.dataset_name, split=split, streaming=True).shuffle(
+                seed=42, buffer_size=10_000
+            )
             logger.info("{self.dataset_name} dataset downloaded from hub")
         except Exception as e:
             raise RuntimeError(f"dataset download failed!!! {e}")
@@ -94,7 +96,7 @@ class ShardDataset:
                     remaining = self.buffer_size - buffer_idx
                     take = min(remaining, len(ids) - start)
 
-                    buffer[buffer_idx:buffer_idx + take] = ids[start:start + take]
+                    buffer[buffer_idx : buffer_idx + take] = ids[start : start + take]
 
                     buffer_idx += take
                     start += take
@@ -110,8 +112,8 @@ class ShardDataset:
                             logger.info("Progress: %d shards created", shard_id)
 
                         shard_id += 1
-                        buffer_idx = 0     
-        if buffer_idx > 0:    #catching last sequences
+                        buffer_idx = 0
+        if buffer_idx > 0:  # catching last sequences
             shard_name = f"{split}_shard{shard_id:04d}.bin"
             try:
                 self.save_shards(buffer[:buffer_idx], shard_name)

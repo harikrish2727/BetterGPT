@@ -1,5 +1,4 @@
 from dataclasses import dataclass
-from tokenizers import Tokenizer
 from pathlib import Path
 
 
@@ -17,6 +16,5 @@ class DatasetConfig:
     buffer_size: int = 20_000_000
 
     def __post_init__(self):
-        if self.dataset_name is None or self.data_column_name is "":
-            raise ValueError(f" give dataset name")
-
+        if self.dataset_name is None or self.data_column_name == "":
+            raise ValueError(" give dataset name")

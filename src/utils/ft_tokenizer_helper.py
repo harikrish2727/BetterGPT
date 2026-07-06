@@ -10,8 +10,16 @@ def prepare_tokenizer(tokenizer):
         tokenizer: The tokenizer to be prepared.
         Returns: The prepared tokenizer.
     """
-    additional_special_tokens = ["<|system|>","<|user|>","<|assistant|>","<|im_start|>","<|im_end|>"]
-    tokenizer.add_special_tokens({"additional_special_tokens":additional_special_tokens})
+    additional_special_tokens = [
+        "<|system|>",
+        "<|user|>",
+        "<|assistant|>",
+        "<|im_start|>",
+        "<|im_end|>",
+    ]
+    tokenizer.add_special_tokens(
+        {"additional_special_tokens": additional_special_tokens}
+    )
 
     if tokenizer.pad_token is None:
         tokenizer.pad_token = tokenizer.eos_token

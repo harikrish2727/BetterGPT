@@ -9,6 +9,7 @@ checkpoint_dir = CHECKPOINT_DIR
 @dataclass
 class TrainingConfig:
     """Hyperparameters and runtime settings for pretraining."""
+
     token_count: int = 470_000_000
     batch_size: int = 64
     learning_rate: float = 3e-4

@@ -3,12 +3,12 @@ from transformers import PretrainedConfig
 
 class BetterGPTConfig(PretrainedConfig):
     model_type = "better_gpt"
-    attribute_map = {                                           #for trl look up for standard attribute names
+    attribute_map = {  # for trl look up for standard attribute names
         "hidden_size": "emb_dim",
         "num_attention_heads": "head_count",
         "num_hidden_layers": "num_blocks",
         "max_position_embeddings": "seq_length",
-    } 
+    }
 
     def __init__(
         self,
@@ -21,7 +21,7 @@ class BetterGPTConfig(PretrainedConfig):
         tie_word_embeddings=True,
         rmsnorm_eps=1e-6,
         rope_base=10000,
-        **kwargs
+        **kwargs,
     ):
         self.vocab_size = vocab_size
         self.emb_dim = emb_dim
@@ -35,4 +35,3 @@ class BetterGPTConfig(PretrainedConfig):
 
         # Initialize the Hugging Face base config
         super().__init__(tie_word_embeddings=tie_word_embeddings, **kwargs)
-

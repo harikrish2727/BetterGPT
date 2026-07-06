@@ -1,7 +1,7 @@
 import math
 import torch
 import torch.nn as nn
-import torch.nn.functional as F  
+import torch.nn.functional as F
 
 from transformers import PreTrainedModel, GenerationMixin
 from transformers.modeling_outputs import CausalLMOutputWithPast
@@ -12,7 +12,8 @@ from src.utils.logger import get_logger
 
 logger = get_logger("better_gpt")
 
-class BetterGPT(PreTrainedModel,GenerationMixin):
+
+class BetterGPT(PreTrainedModel, GenerationMixin):
     """
     A small decoder-only language model adapted for Hugging Face Trainer compatibility.
     """
@@ -36,8 +37,9 @@ class BetterGPT(PreTrainedModel,GenerationMixin):
 
         for name, p in self.named_parameters():
             if name.endswith("out_proj.weight") or name.endswith("down_proj.weight"):
-                nn.init.normal_(p, mean=0.0, std=0.02 / math.sqrt(2 * config.num_blocks))
-
+                nn.init.normal_(
+                    p, mean=0.0, std=0.02 / math.sqrt(2 * config.num_blocks)
+                )
 
     def _init_weights(self, module):
         """weight initialization for Linear and embedding layers"""
@@ -55,7 +57,7 @@ class BetterGPT(PreTrainedModel,GenerationMixin):
     def get_decoder(self):
         return self.model
 
-    #two methods to make resize_token_embeddings() work
+    # two methods to make resize_token_embeddings() work
     def get_input_embeddings(self):
         return self.model.emb_layer
 
@@ -71,20 +73,19 @@ class BetterGPT(PreTrainedModel,GenerationMixin):
         self.lm_head = new_embeddings
 
     def prepare_inputs_for_generation(self, input_ids, attention_mask=None, **kwargs):
-    # When use_cache=False, just return the inputs as-is
-    # The model will process the full sequence each time
+        # When use_cache=False, just return the inputs as-is
+        # The model will process the full sequence each time
 
         if not kwargs.get("use_cache", True):
             return {
                 "input_ids": input_ids,
                 "attention_mask": attention_mask,
             }
-        
+
         return {
             "input_ids": input_ids,
             "attention_mask": attention_mask,
         }
-
 
     def forward(self, input_ids=None, attention_mask=None, labels=None, **kwargs):
         """
@@ -121,8 +122,6 @@ class BetterGPT(PreTrainedModel,GenerationMixin):
             logits=logits,
         )
 
-
-
     @torch.no_grad()
     def custom_generate(self, idx, max_tokens, temp, top_k=None, eos_id=None):
         """
@@ -138,7 +137,7 @@ class BetterGPT(PreTrainedModel,GenerationMixin):
         B = idx.size(0)
         finished = torch.zeros(B, 1, dtype=torch.bool, device=idx.device)
         for _ in range(max_tokens):
-            idx_cond = idx[:, -self.seq_length:]
+            idx_cond = idx[:, -self.seq_length :]
             # changed forward, so extract logits from the returned object
             logits = self(input_ids=idx_cond).logits[:, -1, :]
 
@@ -150,12 +149,14 @@ class BetterGPT(PreTrainedModel,GenerationMixin):
                     k = min(top_k, logits.size(-1))
                     val, _ = torch.topk(logits, k)
                     min_val = val[:, -1].unsqueeze(-1)
-                    logits = logits.masked_fill(logits < min_val, float('-inf'))
+                    logits = logits.masked_fill(logits < min_val, float("-inf"))
                 probs = F.softmax(logits, dim=-1)
                 out_idx = torch.multinomial(probs, num_samples=1)
 
             if eos_id is not None:
-                out_idx = torch.where(finished, torch.full_like(out_idx, eos_id), out_idx)
+                out_idx = torch.where(
+                    finished, torch.full_like(out_idx, eos_id), out_idx
+                )
                 finished = finished | (out_idx == eos_id)
 
             idx = torch.cat([idx, out_idx], dim=1)

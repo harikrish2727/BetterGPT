@@ -1,4 +1,3 @@
-
 chat_template = """
 {%- for message in messages -%}
 {% if message['role'] == 'system' %}

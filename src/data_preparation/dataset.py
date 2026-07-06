@@ -1,6 +1,7 @@
 """
 class to load datashards and stream to train model efficiently.
 """
+
 import random
 
 from glob import glob
@@ -13,6 +14,7 @@ from torch.utils.data import IterableDataset, get_worker_info
 from src.utils.logger import get_logger
 
 logger = get_logger(__name__)
+
 
 class TinyDataset(IterableDataset):
     """
@@ -28,8 +30,9 @@ class TinyDataset(IterableDataset):
     split is exact (24 train shards -> 1, 2, 3, 4, 6, 8, 12, 24).
     """
 
-    def __init__(self, path, seq_length, split, shuffle_buffer=4096,
-                 infinite=True, seed=1337):
+    def __init__(
+        self, path, seq_length, split, shuffle_buffer=4096, infinite=True, seed=1337
+    ):
         """
         Args:
             path: Directory containing the binary shard files.
@@ -60,7 +63,7 @@ class TinyDataset(IterableDataset):
         if info is None:
             logger.info("only one worker is available")
             return self.data_files, 0
-        files = self.data_files[info.id::info.num_workers]
+        files = self.data_files[info.id :: info.num_workers]
         return files, info.id
 
     def _chunks_from_file(self, file, rng):
@@ -76,18 +79,18 @@ class TinyDataset(IterableDataset):
         try:
             data = np.memmap(file, dtype=np.uint16, mode="r")
             n = len(data)
-            n_chunks = (n - 1) // self.seq_length   # -1 because y is shifted +1
+            n_chunks = (n - 1) // self.seq_length  # -1 because y is shifted +1
             if n_chunks <= 0:
                 return
             order = list(range(n_chunks))
             rng.shuffle(order)
             for c in order:
                 start = c * self.seq_length
-                x = data[start:start + self.seq_length].astype(np.int64)
-                y = data[start + 1:start + self.seq_length + 1].astype(np.int64)
+                x = data[start : start + self.seq_length].astype(np.int64)
+                y = data[start + 1 : start + self.seq_length + 1].astype(np.int64)
                 yield torch.from_numpy(x), torch.from_numpy(y)
         finally:
-            if hasattr(data, '_mmap') and data._mmap is not None:
+            if hasattr(data, "_mmap") and data._mmap is not None:
                 data._mmap.close()
 
     def _stream(self, files, rng):

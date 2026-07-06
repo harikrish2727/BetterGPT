@@ -3,6 +3,7 @@ class to create Multi-head self-attention with Rotary Position Embeddings (RoPE)
 using pytorch SDPA class.
 
 """
+
 import torch
 
 from torch import nn
@@ -13,6 +14,7 @@ from src.utils.rope_helper import apply_rotary_pos_emb
 
 logger = get_logger(__name__)
 
+
 class MHAttention(nn.Module):
     """Multi-head self-attention with Rotary Position Embeddings (RoPE).
 
@@ -21,12 +23,7 @@ class MHAttention(nn.Module):
     attention_mask is AND-ed with it at forward time.
     """
 
-    def __init__(
-            self,
-            emb_dim: int,
-            head_count: int,
-            head_dim: int
-            ):
+    def __init__(self, emb_dim: int, head_count: int, head_dim: int):
         """
         Args:
             emb_dim: Model embedding dimension.
@@ -64,32 +61,36 @@ class MHAttention(nn.Module):
 
         logger.debug(f"q shape: {q.shape}, k shape: {k.shape}, v shape: {v.shape}")
         logger.debug(f"sin shape: {sin.shape}, cos shape: {cos.shape}")
-        logger.debug(f"attention_mask shape: {
-            attention_mask.shape if attention_mask is not None else 'None'}"
-            )
+        logger.debug(
+            f"attention_mask shape: {
+                attention_mask.shape if attention_mask is not None else 'None'
+            }"
+        )
 
         rotated_q, rotated_k = apply_rotary_pos_emb(q, k, cos, sin)
 
         causal_mask = torch.triu(
             torch.ones(seq_length, seq_length, device=x.device, dtype=torch.bool),
-            diagonal=1
+            diagonal=1,
         )  # Upper triangular mask for causal attention
 
         if attention_mask is not None:
-            padding_mask = attention_mask.bool().unsqueeze(1).unsqueeze(2)  # [batch, 1, 1, seq_len]
+            padding_mask = (
+                attention_mask.bool().unsqueeze(1).unsqueeze(2)
+            )  # [batch, 1, 1, seq_len]
 
             # Combine: mask positions that are padding OR in the future
             # causal_mask: [seq_len, seq_len] -> [1, 1, seq_len, seq_len]
             combined_mask = causal_mask.unsqueeze(0).unsqueeze(0) | (~padding_mask)
-            #combined_mask is True where attention should be BLOCKED
+            # combined_mask is True where attention should be BLOCKED
 
-            attn_bias = torch.zeros(batch, 1, seq_length, seq_length, device=x.device, dtype=q.dtype)
+            attn_bias = torch.zeros(
+                batch, 1, seq_length, seq_length, device=x.device, dtype=q.dtype
+            )
             attn_bias.masked_fill_(combined_mask, torch.finfo(q.dtype).min)
 
             y = scaled_dot_product_attention(
-                rotated_q, rotated_k, v,
-                attn_mask=attn_bias,
-                is_causal=False
+                rotated_q, rotated_k, v, attn_mask=attn_bias, is_causal=False
             )
         else:
             logger.debug("No attention_mask provided; using causal mask only.")

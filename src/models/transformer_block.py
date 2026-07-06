@@ -1,10 +1,8 @@
-import torch
 import torch.nn as nn
 
 from src.models.swiglu_feed_forward import SwiGLU_FFN
 from src.models.attention import MHAttention
 from src.models.layer_normalization import RMSNorm
-from configs.model import BetterGPTConfig as ModelConfig
 from src.utils.logger import get_logger
 
 logger = get_logger(__name__)
@@ -19,13 +17,8 @@ class TransformerBlock(nn.Module):
     """
 
     def __init__(
-            self, 
-            emb_dim:int, 
-            hid_dim:int, 
-            head_count:int, 
-            head_dim:int,
-            eps:float
-            ):
+        self, emb_dim: int, hid_dim: int, head_count: int, head_dim: int, eps: float
+    ):
         """
         Args:
             emb_dim: Model embedding dimension.
@@ -37,9 +30,7 @@ class TransformerBlock(nn.Module):
         self.pre_attn_norm = RMSNorm(emb_dim, eps)
         self.pre_ffn_norm = RMSNorm(emb_dim, eps)
         self.attention = MHAttention(
-            emb_dim=emb_dim,
-            head_dim=head_dim,
-            head_count=head_count
+            emb_dim=emb_dim, head_dim=head_dim, head_count=head_count
         )
         self.ffn = SwiGLU_FFN(emb_dim=emb_dim, hid_dim=hid_dim)
 
@@ -56,8 +47,7 @@ class TransformerBlock(nn.Module):
             Output tensor of shape (B, T, emb_dim).
         """
         logger.debug(f"Input shape: {x.shape}")
-        x = x + self.attention(self.pre_attn_norm(x), sin,cos,attention_mask)
+        x = x + self.attention(self.pre_attn_norm(x), sin, cos, attention_mask)
         x = x + self.ffn(self.pre_ffn_norm(x))
         logger.debug(f"Output shape: {x.shape}")
         return x
-

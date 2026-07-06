@@ -1,6 +1,7 @@
 """
 pre-Training script for the BetterGPT model.
 """
+
 import os
 import sys
 import torch
@@ -39,10 +40,12 @@ for name, p in model.named_parameters():
     else:
         no_decay.append(p)
 
-logger.info("Optimizer groups | decay=%d params | no_decay=%d params", len(decay), len(no_decay))
+logger.info(
+    "Optimizer groups | decay=%d params | no_decay=%d params", len(decay), len(no_decay)
+)
 
 optim_groups = [
-    {"params": decay,    "weight_decay": 0.1},
+    {"params": decay, "weight_decay": 0.1},
     {"params": no_decay, "weight_decay": 0.0},
 ]
 
@@ -55,10 +58,14 @@ optimizer = torch.optim.AdamW(
 
 # total_steps = num_epochs * len(val_loader) if using dataset class,
 # here using IterableDataset which has no __len__, so derive from token budget
-TOTAL_STEPS = int(training_config.token_count / (training_config.batch_size * model_config.seq_length))
-WARM_UP_STEPS = int(0.02 * TOTAL_STEPS)   # ~2%
+TOTAL_STEPS = int(
+    training_config.token_count / (training_config.batch_size * model_config.seq_length)
+)
+WARM_UP_STEPS = int(0.02 * TOTAL_STEPS)  # ~2%
 
-logger.info("LR schedule | total_steps=%d | warmup_steps=%d", TOTAL_STEPS, WARM_UP_STEPS)
+logger.info(
+    "LR schedule | total_steps=%d | warmup_steps=%d", TOTAL_STEPS, WARM_UP_STEPS
+)
 
 lr_scheduler = get_cosine_schedule_with_warmup(
     optimizer,
