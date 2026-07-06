@@ -22,8 +22,9 @@ class TransformerBlock(nn.Module):
             self, 
             emb_dim:int, 
             hid_dim:int, 
-            head_count:int = ModelConfig().head_count, 
-            head_dim:int = ModelConfig().head_dim
+            head_count:int, 
+            head_dim:int,
+            eps:float
             ):
         """
         Args:
@@ -33,8 +34,8 @@ class TransformerBlock(nn.Module):
             head_dim: Per-head dimension (emb_dim // head_count).
         """
         super().__init__()
-        self.pre_attn_norm = RMSNorm(emb_dim)
-        self.pre_ffn_norm = RMSNorm(emb_dim)
+        self.pre_attn_norm = RMSNorm(emb_dim, eps)
+        self.pre_ffn_norm = RMSNorm(emb_dim, eps)
         self.attention = MHAttention(
             emb_dim=emb_dim,
             head_dim=head_dim,

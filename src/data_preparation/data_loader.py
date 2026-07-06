@@ -1,7 +1,7 @@
 import torch
 from src.data_preparation.dataset import TinyDataset
 from torch.utils.data import DataLoader
-from configs.model import ModelConfig
+from configs.model import BetterGPTConfig as ModelConfig
 from configs.training import TrainingConfig
 from src.utils.paths import DATA_DIR
 from src.utils.logger import get_logger

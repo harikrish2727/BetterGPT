@@ -11,7 +11,7 @@ class RMSNorm(nn.Module):
     avoid precision loss with bfloat16 inputs.
     """
 
-    def __init__(self, emb_dim, eps: float = ModelConfig().rmsnorm_eps):
+    def __init__(self, emb_dim, eps: float = 1e-6):
         """
         Args:
             emb_dim: Size of the last dimension to normalize over.

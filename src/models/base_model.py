@@ -30,8 +30,8 @@ class BetterGPTModel(PreTrainedModel):
         head_dim = config.emb_dim // config.head_count
 
         self.emb_layer = nn.Embedding(config.vocab_size, config.emb_dim)
-        self.rmsnorm = RMSNorm(config.emb_dim)
-        self.rope = RoPESplitHalf(head_dim, config.seq_length)
+        self.rmsnorm = RMSNorm(config.emb_dim, eps=config.rmsnorm_eps)
+        self.rope = RoPESplitHalf(head_dim=head_dim, base=config.rope_base)
 
         self.transformer_block = nn.ModuleList([
             TransformerBlock(
@@ -39,6 +39,7 @@ class BetterGPTModel(PreTrainedModel):
                 head_dim=head_dim,
                 emb_dim=config.emb_dim,
                 hid_dim=hid_dim,
+                eps=config.rmsnorm_eps
             ) for _ in range(config.num_blocks)
         ])
 

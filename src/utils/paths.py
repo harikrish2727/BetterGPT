@@ -1,7 +1,7 @@
 from pathlib import Path
 
 
-ROOT_DIR = Path(__file__).resolve().parents[1]  #change root 2
+ROOT_DIR = Path(__file__).resolve().parents[2]  #change root 2
 
 
 

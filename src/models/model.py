@@ -55,7 +55,7 @@ class BetterGPT(PreTrainedModel,GenerationMixin):
     def get_decoder(self):
         return self.model
 
-    #two methods, so resize_token_embeddings() works
+    #two methods to make resize_token_embeddings() work
     def get_input_embeddings(self):
         return self.model.emb_layer
 
@@ -99,7 +99,7 @@ class BetterGPT(PreTrainedModel,GenerationMixin):
 
         logits = self.lm_head(hidden_states)
 
-        # Calculate the loss automatically if labels are provided
+        # to Calculate the loss,if labels are provided
         loss = None
         if labels is not None:
             # Shift so that tokens < n predict n

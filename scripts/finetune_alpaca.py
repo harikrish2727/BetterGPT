@@ -17,10 +17,9 @@ from src.utils.logger import get_logger
 
 logger = get_logger(__name__)
 
-# model_path = CHECKPOINT_DIR
-# tokenizer_path = TOKENIZER_DIR
-model_path = "./checkpoints/model.pt"
-tokenizer_path = "./tokenizer_checkpoint"
+model_path = CHECKPOINT_DIR
+tokenizer_path = TOKENIZER_DIR
+
 
 def main():
     try:
@@ -83,8 +82,9 @@ if __name__ == "__main__":
     trainer.train()
     logger.info("Fine-tuning completed successfully. Saving model and tokenizer...")
 
-    trainer.save_model(model_path)
-    tokenizer.save_pretrained(tokenizer_path)
+    # trainer.save_model()
+    # tokenizer.save_pretrained(tokenizer_path)
+    trainer.save_model()
 
 
     

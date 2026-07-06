@@ -4,14 +4,14 @@ import torch
 
 from transformers import get_cosine_schedule_with_warmup
 
-from src.models.base_model import BetterGPT
+from src.models.model import BetterGPT
 from configs.model import BetterGPTConfig as ModelConfig
 from configs.training import TrainingConfig
 from src.data_preparation.data_loader import train_loader, val_loader
 from src.pretraining.trainer import training
 from src.utils.logger import get_logger
 
-logger = get_logger("train")
+logger = get_logger(__name__)
 
 model_config = ModelConfig()
 training_config = TrainingConfig()

@@ -6,6 +6,7 @@ readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
     "datasets>=4.8.5",
+    "huggingface-hub>=1.21.0",
     "pip>=26.1.1",
     "tokenizers>=0.22.2",
     "transformers>=5,<6",

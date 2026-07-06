@@ -37,9 +37,5 @@ class RoPESplitHalf(nn.Module):
             emb = torch.cat([freqs, freqs], dim=-1)    # (seq_len, head_dim) — pairs with split-half
             self._cos_cached, self._sin_cached = emb.cos(), emb.sin()
             self._cached_len = seq_len
-        return self._cos_cached[:seq_len], self._sin_cached[:seq_len]
+        return self._cos_cached[:seq_len].to(x.dtype), self._sin_cached[:seq_len].to(x.dtype)
     
-if __name__ == "__main__":
-    # config = ModelConfig()
-    print(f"RoPESplitHalf: head_dim={ModelConfig().head_dim}, rope_base={ModelConfig().rope_base}")
-    # RoPE = RoPESplitHalf(head_dim=config.head_dim, base=config.rope_base)

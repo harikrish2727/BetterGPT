@@ -3,6 +3,12 @@ from transformers import PretrainedConfig
 
 class BetterGPTConfig(PretrainedConfig):
     model_type = "better_gpt"
+    attribute_map = {                                           #for trl look up for standard attribute names
+        "hidden_size": "emb_dim",
+        "num_attention_heads": "head_count",
+        "num_hidden_layers": "num_blocks",
+        "max_position_embeddings": "seq_length",
+    } 
 
     def __init__(
         self,
@@ -17,7 +23,6 @@ class BetterGPTConfig(PretrainedConfig):
         rope_base=10000,
         **kwargs
     ):
-        assert emb_dim % head_count == 0, "emb_dim must be divisible by head_count"
         self.vocab_size = vocab_size
         self.emb_dim = emb_dim
         self.num_blocks = num_blocks
@@ -27,7 +32,6 @@ class BetterGPTConfig(PretrainedConfig):
         self.ffn_multiple = ffn_multiple
         self.rope_base = rope_base
         self.head_dim = self.emb_dim // self.head_count
-        self.architectures = ["BetterGPTModel"]
 
         # Initialize the Hugging Face base config
         super().__init__(tie_word_embeddings=tie_word_embeddings, **kwargs)
