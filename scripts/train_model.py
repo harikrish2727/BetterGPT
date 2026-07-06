@@ -1,3 +1,6 @@
+"""
+pre-Training script for the BetterGPT model.
+"""
 import os
 import sys
 import torch
@@ -52,15 +55,15 @@ optimizer = torch.optim.AdamW(
 
 # total_steps = num_epochs * len(val_loader) if using dataset class,
 # here using IterableDataset which has no __len__, so derive from token budget
-total_steps = int(training_config.token_count / (training_config.batch_size * model_config.seq_length))
-warmup_steps = int(0.02 * total_steps)   # ~2%
+TOTAL_STEPS = int(training_config.token_count / (training_config.batch_size * model_config.seq_length))
+WARM_UP_STEPS = int(0.02 * TOTAL_STEPS)   # ~2%
 
-logger.info("LR schedule | total_steps=%d | warmup_steps=%d", total_steps, warmup_steps)
+logger.info("LR schedule | total_steps=%d | warmup_steps=%d", TOTAL_STEPS, WARM_UP_STEPS)
 
 lr_scheduler = get_cosine_schedule_with_warmup(
     optimizer,
-    num_warmup_steps=warmup_steps,
-    num_training_steps=total_steps,
+    num_warmup_steps=WARM_UP_STEPS,
+    num_training_steps=TOTAL_STEPS,
 )
 
 
@@ -69,7 +72,7 @@ if __name__ == "__main__":
         best_val_loss = training(
             model,
             model_config,
-            total_steps,
+            TOTAL_STEPS,
             train_loader,
             val_loader,
             optimizer,

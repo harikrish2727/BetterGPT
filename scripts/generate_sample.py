@@ -1,17 +1,22 @@
-import torch
-import torch.nn.functional as F
-from tokenizers import Tokenizer
+"""
+This script loads a trained BetterGPT model checkpoint and generates text for one or more prompts.
+It uses the tokenizer to encode the prompts and decode the generated output.
+"""
 
-from configs.model import ModelConfig
+import torch
+from transformers import PreTrainedTokenizerFast
+
+from configs.model import BetterGPTConfig as ModelConfig
 from configs.training import TrainingConfig
-from src.models.base_model import BetterGPT
+from src.models.model import BetterGPT
 from src.utils.logger import get_logger
+from src.utils.paths import CHECKPOINT_DIR, TOKENIZER_DIR
 
 logger = get_logger("sample")
 
+model_path = CHECKPOINT_DIR/"best_model.pt"
 
-def load_and_predict(text, model_path, tokenizer_path, device,
-                     max_tokens=100, temp=0.4, top_k=7, stop_at_eos=True):
+def load_and_predict(text, device, max_tokens=100, temp=0.4, top_k=7, stop_at_eos=True):
     """Load a trained checkpoint and generate text for one or more prompts.
 
     All prompts in `text` must encode to the same token length because the model
@@ -20,8 +25,6 @@ def load_and_predict(text, model_path, tokenizer_path, device,
 
     Args:
         text: A single prompt string or a list of equal-length prompt strings.
-        model_path: Path to the .pt checkpoint file produced by the trainer.
-        tokenizer_path: Path to the tokenizer JSON file.
         device: Torch device string ('cpu', 'cuda', etc.).
         max_tokens: Maximum number of new tokens to generate per prompt.
         temp: Sampling temperature; 0 for greedy decoding.
@@ -38,8 +41,8 @@ def load_and_predict(text, model_path, tokenizer_path, device,
     if top_k is not None and top_k <= 0:
         raise ValueError(f"top_k must be > 0, got {top_k}")
 
-    tokenizer = Tokenizer.from_file(tokenizer_path)
-    eos_id = tokenizer.token_to_id("<eos>") if stop_at_eos else None
+    tokenizer = PreTrainedTokenizerFast.from_pretrained(TOKENIZER_DIR)
+    eos_id = tokenizer.token_to_id("<eos>") if stop_at_eos else None #check this call works for fast tokenizer
 
     ckpt = torch.load(model_path, map_location=device, weights_only=True)
     model = BetterGPT(ModelConfig(**ckpt["model_config"]))
@@ -81,14 +84,9 @@ if __name__ == "__main__":
     import os
 
     training_config = TrainingConfig()
-    path = training_config.checkpoint_dir
-    model_path = os.path.join(path, "best_model.pt")
 
     if not os.path.exists(model_path):
         raise FileNotFoundError(f"Model checkpoint not found at {model_path}")
-
-    tokenizer_path = "./tokenizer.json"
-    device = training_config.device
 
     parser = argparse.ArgumentParser()
     parser.add_argument("--text", type=str, required=True)
@@ -101,9 +99,7 @@ if __name__ == "__main__":
 
     output = load_and_predict(
         text=args.text,
-        model_path=model_path,
-        tokenizer_path=tokenizer_path,
-        device=device,
+        device=training_config.device,
         max_tokens=args.max_tokens,
         temp=args.temp,
         top_k=args.top_k,

@@ -1,11 +1,18 @@
-
+"""
+class to load datashards and stream to train model efficiently.
+"""
 import random
-import torch
 
 from glob import glob
 import numpy as np
+
+import torch
+
 from torch.utils.data import IterableDataset, get_worker_info
 
+from src.utils.logger import get_logger
+
+logger = get_logger(__name__)
 
 class TinyDataset(IterableDataset):
     """
@@ -51,6 +58,7 @@ class TinyDataset(IterableDataset):
         """
         info = get_worker_info()
         if info is None:
+            logger.info("only one worker is available")
             return self.data_files, 0
         files = self.data_files[info.id::info.num_workers]
         return files, info.id

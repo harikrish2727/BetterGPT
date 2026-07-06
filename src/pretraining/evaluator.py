@@ -29,7 +29,7 @@ def evaluate(model, val_loader, device, max_batches=50):
         input_seq = input_seq.to(device, non_blocking=True)
         tar_seq = tar_seq.to(device, non_blocking=True)
         with torch.amp.autocast(device_type=device_str, dtype=torch.bfloat16, enabled=(device_str == "cuda")):
-            logits = model(input_seq)
+            logits = model(input_seq).logits
             B, T, V = logits.shape
             loss = F.cross_entropy(logits.view(B * T, V), tar_seq.view(B * T))
         losses.append(loss.item())

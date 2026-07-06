@@ -1,7 +1,8 @@
-import torch
+"""
+Fine-tuning script for the pretrained BetterGPT model on the Alpaca dataset.
 
+"""
 from trl import SFTTrainer
-from transformers import EarlyStoppingCallback
 from transformers import PreTrainedTokenizerFast,EarlyStoppingCallback
 from datasets import load_dataset
 
@@ -11,7 +12,6 @@ from src.utils.ft_tokenizer_helper import prepare_tokenizer
 from src.utils.prepare_alpaca_dataset import convert_alpaca_format
 from src.utils.paths import CHECKPOINT_DIR, TOKENIZER_DIR
 from src.utils.data_splitter import split_dataset
-from configs.tokenizer_config import TokenizerConfig
 from src.utils.logger import get_logger
 
 
@@ -22,6 +22,9 @@ tokenizer_path = TOKENIZER_DIR
 
 
 def main():
+    """
+    Main function to orchestrate the fine-tuning process.
+    """
     try:
         logger.info("Starting fine-tuning process")
         dataset = load_dataset("yahma/alpaca-cleaned", split="train")
@@ -85,6 +88,3 @@ if __name__ == "__main__":
     # trainer.save_model()
     # tokenizer.save_pretrained(tokenizer_path)
     trainer.save_model()
-
-
-    

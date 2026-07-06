@@ -1,10 +1,17 @@
+"""
+DataLoader for TinyStories dataset.
+This module defines the DataLoader for the TinyStories dataset,
+which is used for training and validation
+"""
 import torch
-from src.data_preparation.dataset import TinyDataset
 from torch.utils.data import DataLoader
+
+
 from configs.model import BetterGPTConfig as ModelConfig
 from configs.training import TrainingConfig
 from src.utils.paths import DATA_DIR
 from src.utils.logger import get_logger
+from src.data_preparation.dataset import TinyDataset
 
 logger = get_logger(__name__)
 
