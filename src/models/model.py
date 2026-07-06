@@ -10,7 +10,7 @@ from configs.model import BetterGPTConfig
 from src.models.base_model import BetterGPTModel
 from src.utils.logger import get_logger
 
-logger = get_logger("better_gpt")
+logger = get_logger(__name__)
 
 
 class BetterGPT(PreTrainedModel, GenerationMixin):
