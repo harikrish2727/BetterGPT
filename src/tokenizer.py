@@ -1,5 +1,7 @@
+"""This code trains a byte bpe tokenizer against the given subset of the dataset.
+"""
+
 import json
-import logging
 import os
 import shutil
 import tempfile
@@ -8,14 +10,16 @@ from typing import Any, Callable, Iterable, List, Optional
 from tokenizers import Regex, Tokenizer
 from tokenizers.decoders import ByteLevel as ByteLevelDecoder
 from tokenizers.models import BPE
-from tokenizers.pre_tokenizers import ByteLevel, Sequence, Split
+from tokenizers.pre_tokenizers import ByteLevel, Sequence, Split, Digits
 from tokenizers.processors import TemplateProcessing
 from tokenizers.trainers import BpeTrainer
 from transformers import PreTrainedTokenizerFast
 
+from configs.template import chat_template
 from configs.tokenizer_config import TokenizerConfig
+from src.utils.logger import get_logger
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 SPLIT_PATTERN = (
     r"""'s|'t|'re|'ve|'m|'ll|'d| ?\p{L}+| ?\p{N}+| ?[^\s\p{L}\p{N}]+|\s+(?!\S)|\s+"""
@@ -96,6 +100,7 @@ class TokenizerTrainer:
         tok.pre_tokenizer = Sequence(
             [
                 Split(Regex(SPLIT_PATTERN), behavior="isolated"),
+                Digits(individual_digits=True),
                 ByteLevel(add_prefix_space=False, use_regex=False),
             ]
         )
@@ -250,6 +255,8 @@ class TokenizerTrainer:
             if val is not None:
                 kwargs[name] = val
         hf = PreTrainedTokenizerFast(**kwargs)
+        logger.info("Attaching chat template to Hugging Face wrapper")
+        hf.chat_template = chat_template
         hf.save_pretrained(save_dir)
         logger.debug("saved HuggingFace tokenizer to %s", save_dir)
 

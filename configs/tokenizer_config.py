@@ -5,15 +5,15 @@ from typing import List, Optional
 @dataclass
 class TokenizerConfig:
     special_tokens: List[str]
-    vocab_size: int = 8192
+    vocab_size: int = 32768
     batch_size: int = 1000
     min_frequency: int = 2
     text_field: str = "text"
-    model_max_length: int = 8192
-    unk_token: Optional[str] = "<unk>"
-    pad_token: Optional[str] = "<pad>"
-    bos_token: Optional[str] = "<bos>"
-    eos_token: Optional[str] = "<eos>"
+    model_max_length: int = 32768
+    unk_token: Optional[str] = "<|unk|>"
+    pad_token: Optional[str] = "<|pad|>"
+    bos_token: Optional[str] = "<|bos|>"
+    eos_token: Optional[str] = "<|eos|>"
     additional_special_tokens: List[str] = field(default_factory=list)
 
     def __post_init__(self):

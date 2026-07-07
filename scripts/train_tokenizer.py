@@ -21,7 +21,7 @@ logger = get_logger(__name__)
 path = TOKENIZER_DIR
 
 
-def main(vocab_size: int, special_tokens: list):
+def main(vocab_size: int, special_tokens: list, dataset_name:str,sample_size:int):
     """
     Main function to train a tokenizer on the TinyStories dataset and save it to disk.
     Args:
@@ -31,10 +31,10 @@ def main(vocab_size: int, special_tokens: list):
         The trained tokenizer instance.
     """
     logger.info("Loading dataset...")
-    ds = load_dataset("roneneldan/TinyStories", split="train", streaming=True).take(
-        300000
+    ds = load_dataset(dataset_name, split="train", streaming=True).take(
+        sample_size
     )
-    logger.info("TinyStories dataset loaded")
+    logger.info(f"{dataset_name} dataset loaded")
 
     tok = TokenizerTrainer(
         dataset=ds,
@@ -45,7 +45,11 @@ def main(vocab_size: int, special_tokens: list):
 
 
 if __name__ == "__main__":
-    VOCAB_SIZE = 8192
-    special_tokens = ["<bos>", "<eos>", "<pad>", "<unk>"]
+    VOCAB_SIZE = 32768
+    special_tokens =  ["<|bos|>", "<|eos|>", "<|pad|>", "<|unk|>",  "<|system|>","<|user|>","<|assistant|>","<|im_start|>","<|im_end|>"]
     logger.info("starting...")
-    main(vocab_size=VOCAB_SIZE, special_tokens=special_tokens)
+
+    main(vocab_size=VOCAB_SIZE,
+         special_tokens=special_tokens,
+         dataset_name="HuggingFaceFW/fineweb-edu",
+         sample_size=300)
