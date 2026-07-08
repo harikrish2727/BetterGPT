@@ -9,7 +9,7 @@ def apply_template(messages):
     messages = [
     {"role": "user", "content": "Hello, how are you?"}
 ]
-    test_output = tok.apply_chat_template(messages, tokenize=True, add_generation_prompt=True)
+    test_output = tok.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
     print("Test Output:\n", test_output)
 
 
@@ -19,5 +19,7 @@ def number_test(num_list:list):
         print(p, "→", [tok.decode(i) for i in enc["input_ids"]])
 
 if __name__ == "__main__":
-    nums = ["3.14159", "2026-07-07", " 1234567", "175B","hello"," hello"]
+    mgs = "hello how are you"
+    nums = ["3.14159", "2026-07-07", " 1234567", "175B","hello"," hello","def make_num():"]
     number_test(nums)
+    apply_template(mgs)
