@@ -1,3 +1,7 @@
+"""
+Prepare tokenizer function is indented to use only if tokenizer is already trained without the special tokens,
+and no chat-template is applied. This function add the special tokens and chat template to tokenizer.
+"""
 from configs.template import chat_template
 from src.utils.logger import get_logger
 

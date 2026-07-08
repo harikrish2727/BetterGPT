@@ -12,11 +12,11 @@ class BetterGPTConfig(PretrainedConfig):
 
     def __init__(
         self,
-        vocab_size=8192,
-        emb_dim=512,
-        num_blocks=8,
-        head_count=8,
-        seq_length=512,
+        vocab_size=32768,
+        emb_dim=768,
+        num_blocks=18,
+        head_count=12,
+        seq_length=2048,
         ffn_multiple=128,
         tie_word_embeddings=True,
         rmsnorm_eps=1e-6,

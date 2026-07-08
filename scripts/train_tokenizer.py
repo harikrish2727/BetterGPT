@@ -52,4 +52,4 @@ if __name__ == "__main__":
     main(vocab_size=VOCAB_SIZE,
          special_tokens=special_tokens,
          dataset_name="HuggingFaceFW/fineweb-edu",
-         sample_size=300)
+         sample_size=3000)
