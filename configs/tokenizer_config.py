@@ -9,7 +9,7 @@ class TokenizerConfig:
     batch_size: int = 1000
     min_frequency: int = 2
     text_field: str = "text"
-    model_max_length: int = 32768
+    model_max_length: int = 2048
     unk_token: Optional[str] = "<|unk|>"
     pad_token: Optional[str] = "<|pad|>"
     bos_token: Optional[str] = "<|bos|>"

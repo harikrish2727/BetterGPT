@@ -33,24 +33,24 @@ class ShardDataset:
 
     def __init__(
         self,
-        dataset_name: str = DatasetConfig.dataset_name,
+        dataset_name:str,
+        data_column_name:str="text",
         tokenizer_path: Path = DatasetConfig.tokenizer_path,
         out_dir: Path = DatasetConfig.out_dir,
-        data_column_name: str = DatasetConfig.data_column_name,
         buffer_size: int = DatasetConfig.buffer_size,
     ):
         """
         Args:
-            dataset_name: HuggingFace dataset identifier (e.g. 'roneneldan/TinyStories').
+            
             tokenizer: Trained tokenizers.Tokenizer instance.
             out_dir: Root output directory; shards are written under <out_dir>/<dataset>_data/.
-            split: Dataset split to process ('train', 'validation', etc.).
+            
             data_column_name: Column name that contains the raw text strings.
             buffer_size: Number of tokens to accumulate before flushing one shard file.
         """
         self.tokenizer = AutoTokenizer.from_pretrained(tokenizer_path)
-        self.dataset_name = dataset_name
-        data_folder_name = f"{dataset_name.split('/')[-1]}_data"
+        
+        data_folder_name = f"{dataset_name}_data"
         self.data_column_name = data_column_name
         self.out_dir = os.path.join(out_dir, data_folder_name)
         self.buffer_size = buffer_size
@@ -70,21 +70,14 @@ class ShardDataset:
             data_ids.tofile(shard_path)
             logger.info("Saved shard: %s", shard_name)
 
-    def run(self, split):
+    def run(self,ds, shard_id=1, max_file_limit=2):
         """Tokenize the given dataset split and write token IDs to shard files.
         Args:
             split: Dataset split name to process ('train', 'validation', etc.).
-        """
-        shard_id = 1
+        """   
+
         buffer = np.empty(self.buffer_size, dtype=np.uint16)  # creating buffer
         buffer_idx = 0
-        try:
-            ds = load_dataset(self.dataset_name, split=split, streaming=True).shuffle(
-                seed=42, buffer_size=10_000
-            )
-            logger.info("{self.dataset_name} dataset downloaded from hub")
-        except Exception as e:
-            raise RuntimeError(f"dataset download failed!!! {e}")
 
         for samples in ds.iter(1000):
             encoded = self.tokenizer(samples[self.data_column_name])
@@ -102,7 +95,7 @@ class ShardDataset:
                     start += take
 
                     if buffer_idx == self.buffer_size:
-                        shard_name = f"{split}_shard{shard_id:04d}.bin"
+                        shard_name = f"train_shard{shard_id:04d}.bin"
                         try:
                             self.save_shards(buffer, shard_name)
                         except Exception as e:
@@ -113,8 +106,12 @@ class ShardDataset:
 
                         shard_id += 1
                         buffer_idx = 0
+                        if shard_id>max_file_limit:
+                            print("max files created")
+                            return
+
         if buffer_idx > 0:  # catching last sequences
-            shard_name = f"{split}_shard{shard_id:04d}.bin"
+            shard_name = f"train_shard{shard_id:04d}.bin"
             try:
                 self.save_shards(buffer[:buffer_idx], shard_name)
                 logger.info("final shard saved")

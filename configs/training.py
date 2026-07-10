@@ -10,7 +10,7 @@ checkpoint_dir = CHECKPOINT_DIR
 class TrainingConfig:
     """Hyperparameters and runtime settings for pretraining."""
 
-    token_count: int = 470_000_000
+    token_count: int = 1_000_000_000   # change for new training
     batch_size: int = 64
     learning_rate: float = 3e-4
     betas: tuple = (0.9, 0.95)
