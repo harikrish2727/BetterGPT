@@ -5,13 +5,20 @@ from src.utils.paths import CHECKPOINT_DIR
 
 checkpoint_dir = CHECKPOINT_DIR
 
+#for smoke test
+TARGET_TOTAL_TOKENS = 10_000_000_000  #smoke test
+TOKEN_SWITCH_THRESHOLD = 9_000_000_000
 
 @dataclass
 class TrainingConfig:
     """Hyperparameters and runtime settings for pretraining."""
 
-    token_count: int = 1_000_000_000   # change for new training
-    batch_size: int = 64
+    token_count: int = 10_000_000_000
+    target_token_pretraining: int = TARGET_TOTAL_TOKENS
+    token_switch_threshold: int = TOKEN_SWITCH_THRESHOLD
+    batch_size: int = 8
+    seq_length: int = 2048
+    grad_accum_steps = 4
     learning_rate: float = 3e-4
     betas: tuple = (0.9, 0.95)
     eps: float = 1e-8
