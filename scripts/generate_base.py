@@ -12,9 +12,9 @@ from src.models.model import BetterGPT
 from src.utils.logger import get_logger
 from src.utils.paths import CHECKPOINT_DIR, TOKENIZER_DIR
 
-logger = get_logger("sample")
+logger = get_logger(__name__)
 
-model_path = CHECKPOINT_DIR / "best_model.pt"
+model_path = CHECKPOINT_DIR / "checkpoint_step_5000.pt"
 
 
 def load_and_predict(text, device, max_tokens=100, temp=0.4, top_k=7, stop_at_eos=True):

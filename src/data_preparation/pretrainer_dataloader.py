@@ -1,3 +1,5 @@
+import torch
+
 from torch.utils.data import DataLoader
 
 from configs.training import TrainingConfig
@@ -6,6 +8,9 @@ from src.utils.paths import DATA_DIR
 from src.data_preparation.dataset import PreTrainingDataset
 
 logger = get_logger(__name__)
+
+PIN_MEMORY = torch.cuda.is_available()
+NUM_WORKERS = 4 if torch.cuda.is_available() else 0
 
 STABLE_TRAIN_DIR = DATA_DIR/"stable/train"
 STABLE_VAL_DIR = DATA_DIR/"stable/valid"
@@ -33,9 +38,39 @@ annealing_val_dataset = PreTrainingDataset(ANNEAL_VAL_DIR, SEQ_LENGTH, infinite=
 
 #DATALOADERS
 
-stable_train_loader = DataLoader(stable_train_dataset, batch_size=BATCH_SIZE, num_workers=4)
-stable_val_loader   = DataLoader(stable_valid_dataset,batch_size=BATCH_SIZE, num_workers=2)
 
-logic_train_loader  = DataLoader(annealing_train_dataset, batch_size=BATCH_SIZE, num_workers=4)
-logic_val_loader    = DataLoader(annealing_val_dataset, batch_size=BATCH_SIZE, num_workers=2)
+stable_train_loader = DataLoader(
+                                    stable_train_dataset,
+                                    batch_size=BATCH_SIZE,
+                                    num_workers=NUM_WORKERS,
+                                    pin_memory=PIN_MEMORY,
+                                    persistent_workers=PIN_MEMORY,
+                                    drop_last=True
+                                )
+stable_val_loader   = DataLoader(
+                                    stable_valid_dataset,
+                                    batch_size=BATCH_SIZE,
+                                    num_workers=NUM_WORKERS,
+                                    pin_memory=PIN_MEMORY,
+                                    persistent_workers=PIN_MEMORY,
+                                    drop_last=True
+                                )
+
+logic_train_loader  = DataLoader(
+                                    annealing_train_dataset,
+                                    batch_size=BATCH_SIZE,
+                                    num_workers=NUM_WORKERS,
+                                    pin_memory=PIN_MEMORY,
+                                    persistent_workers=PIN_MEMORY,
+                                    drop_last=True
+                                )
+
+logic_val_loader    = DataLoader(
+                                    annealing_val_dataset,
+                                    batch_size=BATCH_SIZE,
+                                    num_workers=NUM_WORKERS,
+                                    pin_memory=PIN_MEMORY,
+                                    persistent_workers=PIN_MEMORY,
+                                    drop_last=True
+                                )
 
