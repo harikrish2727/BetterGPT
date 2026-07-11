@@ -3,11 +3,10 @@ class to load datashards and stream to train model efficiently.
 """
 
 import random
+import torch
 
 from glob import glob
 import numpy as np
-
-import torch
 
 from torch.utils.data import IterableDataset, get_worker_info
 
@@ -16,7 +15,7 @@ from src.utils.logger import get_logger
 logger = get_logger(__name__)
 
 
-class TinyDataset(IterableDataset):
+class PreTrainingDataset(IterableDataset):
     """
     Contiguous-packing dataset for from-scratch LM pretraining (single-GPU).
 
@@ -31,7 +30,7 @@ class TinyDataset(IterableDataset):
     """
 
     def __init__(
-        self, path, seq_length, split, shuffle_buffer=4096, infinite=True, seed=1337
+        self, path, seq_length, shuffle_buffer=4096, infinite=True, seed=1337
     ):
         """
         Args:
@@ -44,13 +43,13 @@ class TinyDataset(IterableDataset):
             seed: Base random seed; advanced per worker and per epoch to vary shuffling.
         """
         super().__init__()
-        self.data_files = sorted(glob(f"{path}/{split}*.bin"))
+        self.data_files = sorted(glob(f"{path}/*.bin"))
         self.seq_length = seq_length
         self.shuffle_buffer = shuffle_buffer
         self.infinite = infinite
         self.seed = seed
         if not self.data_files:
-            raise FileNotFoundError(f"No files found for split '{split}' in {path}")
+            raise FileNotFoundError(f"No files found in {path}")
 
     def _worker_files(self):
         """Return the subset of shard files assigned to this DataLoader worker.
@@ -135,3 +134,4 @@ class TinyDataset(IterableDataset):
         rng.shuffle(buf)
         for sample in buf:
             yield sample
+
