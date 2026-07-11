@@ -6,7 +6,7 @@ from src.utils.paths import CHECKPOINT_DIR
 checkpoint_dir = CHECKPOINT_DIR
 
 #for smoke test
-TARGET_TOTAL_TOKENS = 10_000_000_000  #smoke test
+TARGET_TOTAL_TOKENS = 10_000_000_000
 TOKEN_SWITCH_THRESHOLD = 9_000_000_000
 
 @dataclass
@@ -18,10 +18,12 @@ class TrainingConfig:
     token_switch_threshold: int = TOKEN_SWITCH_THRESHOLD
     batch_size: int = 8
     seq_length: int = 2048
-    grad_accum_steps = 4
+    grad_accum_steps = 8
     learning_rate: float = 3e-4
     betas: tuple = (0.9, 0.95)
     eps: float = 1e-8
+    eval_every:int = 1000
+    save_every:int = 5000
     device: str = "cuda" if torch.cuda.is_available() else "cpu"
     checkpoint_dir: str = checkpoint_dir
 

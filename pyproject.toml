@@ -12,6 +12,8 @@ dependencies = [
     "tokenizers>=0.22.2",
     "transformers>=5,<6",
     "trl>=1.7.0",
+    "torch>=2.12.1",
+    "triton>=3.0.0",
 ]
 
 
@@ -23,3 +25,4 @@ build-backend = "setuptools.build_meta"
 where = ["."]
 include = ["src*", "configs*"]
 namespaces = true
+

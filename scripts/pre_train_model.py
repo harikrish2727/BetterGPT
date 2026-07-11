@@ -18,14 +18,15 @@ from src.utils.logger import get_logger
 logger = get_logger(__name__)
 
 
-SEQ_LENGTH = 2048
-BATCH_SIZE = 8
-GRAD_ACCUM_STEPS = 4
+SEQ_LENGTH = TrainingConfig.seq_length
+BATCH_SIZE = TrainingConfig.batch_size
+GRAD_ACCUM_STEPS = TrainingConfig.grad_accum_steps
 
 if __name__ == "__main__":
     # 1. Model Initialization
     model_config = BetterGPTConfig()
     model = BetterGPT(model_config)
+    model = torch.compile(model)
     total_params = sum(p.numel() for p in model.parameters())
     logger.info("Model initialized | parameters=%dM", total_params // 1_000_000)
 
@@ -56,6 +57,7 @@ if __name__ == "__main__":
         lr=TrainingConfig.learning_rate,
         betas=TrainingConfig.betas,
         eps=TrainingConfig.eps,
+        fused=True
     )
 
     # 3. Calculate Step Boundaries for the WSD Scheduler
@@ -103,9 +105,9 @@ if __name__ == "__main__":
             target_total_tokens=TrainingConfig.target_token_pretraining,
             token_switch_threshold=TrainingConfig.token_switch_threshold,
             save_path=path,
-            resume_checkpoint=None   #os.path.join(path,"checkpoint_final.pt"),  # Set this to a path string if resuming
-            eval_every=2000,
-            save_every=5000          #for smoke change back both 
+            resume_checkpoint=None,   #os.path.join(path,"checkpoint_final.pt"),  # Set this to a path string if resuming
+            eval_every=TrainingConfig.eval_every,
+            save_every=TrainingConfig.save_every
         )
     except Exception as e:
         logger.exception("Training failed with an unhandled exception: %s", e)

@@ -64,7 +64,7 @@ def training(
     stable_train, stable_val = stable_loaders
     logic_train, logic_val = logic_loaders
     
-    # Initialize active streams
+    
     active_train_iter = iter(stable_train)
     active_val_loader = stable_val
 
@@ -86,7 +86,7 @@ def training(
         logger.info(f"Resumed from step {step} ({global_tokens/1e9:.3f}B tokens)")
         
         # Fast-forward the active dataloader
-        # We multiply by GRAD_ACCUM_STEPS because 'step' tracks optimizer steps, 
+        # multiply by GRAD_ACCUM_STEPS because 'step' tracks optimizer steps, 
         # but the dataloader yields 'micro-batches'.
         batches_to_skip = step * GRAD_ACCUM_STEPS
         active_train_iter = fast_forward_iterator(active_train_iter, batches_to_skip)
@@ -113,17 +113,17 @@ def training(
     optimizer.zero_grad(set_to_none=True)
     micro_step = 0
 
-    # Calculate total steps purely for the progress bar
+    # Calculate total steps for the progress bar
     estimated_tokens_per_step = BATCH_SIZE * SEQ_LENGTH * GRAD_ACCUM_STEPS
     total_steps = target_total_tokens // estimated_tokens_per_step
     pbar = tqdm(total=total_steps, initial=step, desc="Training")
 
-    # --- MAIN LOOP ---
+    # MAIN LOOP
     while global_tokens < target_total_tokens:
         
         # 1. PHASE SWITCH LOGIC
         if global_tokens >= token_switch_threshold and not using_logic_data:
-            logger.info(f"--- 9B TOKENS REACHED. SWAPPING TO LOGIC DATA ---")
+            logger.info(f"--- 90% TOKENS REACHED. SWAPPING TO LOGIC DATA ---")
             active_train_iter = iter(logic_train)
             active_val_loader = logic_val
             using_logic_data = True
