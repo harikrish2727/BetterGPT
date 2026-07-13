@@ -15,6 +15,8 @@ from configs.model import BetterGPTConfig
 from configs.training import TrainingConfig
 from src.utils.logger import get_logger
 
+torch.set_float32_matmul_precision('high')
+
 logger = get_logger(__name__)
 
 
@@ -105,7 +107,7 @@ if __name__ == "__main__":
             target_total_tokens=TrainingConfig.target_token_pretraining,
             token_switch_threshold=TrainingConfig.token_switch_threshold,
             save_path=path,
-            resume_checkpoint=os.path.join(path,"checkpoint_step_5000.pt"),  # Set this to a path string if resuming else None
+            resume_checkpoint=os.path.join(path,"checkpoint_latest.pt"),  # Set this to a path string if resuming else None
             eval_every=TrainingConfig.eval_every,
             save_every=TrainingConfig.save_every
         )

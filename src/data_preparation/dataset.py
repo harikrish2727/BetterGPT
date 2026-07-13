@@ -75,6 +75,7 @@ class PreTrainingDataset(IterableDataset):
             file: Path to a binary uint16 shard file.
             rng: random.Random instance for shuffling chunk order within the file.
         """
+        data = None
         try:
             data = np.memmap(file, dtype=np.uint16, mode="r")
             n = len(data)
@@ -89,20 +90,18 @@ class PreTrainingDataset(IterableDataset):
                 y = data[start + 1 : start + self.seq_length + 1].astype(np.int64)
                 yield torch.from_numpy(x), torch.from_numpy(y)
         finally:
-            if hasattr(data, "_mmap") and data._mmap is not None:
+            if data is not None and hasattr(data, "_mmap") and data._mmap is not None:
                 data._mmap.close()
 
     def _stream(self, files, rng):
-        """Yield chunks from all files in a randomly shuffled order.
-
-        Args:
-            files: List of shard file paths to stream from.
-            rng: random.Random instance controlling file-level shuffle order.
-        """
-        file_order = list(files)
-        rng.shuffle(file_order)
-        for file in file_order:
-            yield from self._chunks_from_file(file, rng)
+        """Randomly interleave chunks across all open files."""
+        gens = [self._chunks_from_file(f, rng) for f in files]
+        while gens:
+            i = rng.randrange(len(gens))
+            try:
+                yield next(gens[i])
+            except StopIteration:
+                gens.pop(i)
 
     def __iter__(self):
         """Iterate over token windows with reservoir-sampled shuffling.

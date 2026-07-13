@@ -7,7 +7,7 @@ logger = get_logger(__name__)
 
 
 @torch.no_grad()
-def evaluate(model, val_loader, device, max_batches=50):
+def evaluate(model, val_loader, device, max_batches=128):
     """Compute average cross-entropy loss on the validation set.
 
     Args:
