@@ -9,6 +9,6 @@ wheels/
 
 # Virtual environments
 .venv
-checkpoints/
+*.safetensors
 data/
 model_checkpoints/
