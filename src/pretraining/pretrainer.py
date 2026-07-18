@@ -82,7 +82,7 @@ def training(
             torch.save({
                 "step": step,
                 "global_tokens": global_tokens,
-                "model_config": asdict(model_config),
+                "model_config": model_config.to_dict(),
                 "model_state": model.state_dict(),
                 "optimizer_state": optimizer.state_dict(),
                 "scheduler_state": lr_scheduler.state_dict(),
