@@ -1,0 +1,17 @@
+{
+  "vocab_size_target": 32768,
+  "vocab_size_actual": 32768,
+  "min_frequency": 2,
+  "special_tokens": [
+    "<|bos|>",
+    "<|eos|>",
+    "<|pad|>",
+    "<|unk|>",
+    "<|system|>",
+    "<|user|>",
+    "<|assistant|>",
+    "<|im_start|>",
+    "<|im_end|>"
+  ],
+  "split_pattern": "'s|'t|'re|'ve|'m|'ll|'d| ?\\p{L}+| ?\\p{N}+| ?[^\\s\\p{L}\\p{N}]+|\\s+(?!\\S)|\\s+"
+}
