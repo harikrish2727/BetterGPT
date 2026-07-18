@@ -6,9 +6,9 @@ import torch.nn.functional as F
 from transformers import PreTrainedModel, GenerationMixin
 from transformers.modeling_outputs import CausalLMOutputWithPast
 
-from configs.model import BetterGPTConfig
-from src.models.base_model import BetterGPTModel
-from src.utils.logger import get_logger
+from .model_config import BetterGPTConfig
+from .base_model import BetterGPTModel
+from .logger import get_logger
 
 logger = get_logger(__name__)
 
