@@ -149,22 +149,6 @@ Evaluation benchmarks are currently in progress and will be released separately.
 
 # Usage
 
-## Load as a base model
-
-```python
-from transformers import AutoModel, AutoTokenizer
-
-tokenizer = AutoTokenizer.from_pretrained(
-    "Harikrish2727/BetterGPT-150M",
-    trust_remote_code=True
-)
-
-model = AutoModel.from_pretrained(
-    "Harikrish2727/BetterGPT-150M",
-    trust_remote_code=True
-)
-```
-
 ## Load for text generation
 
 ```python
@@ -203,6 +187,21 @@ outputs = model.generate(
 
 print(tokenizer.decode(outputs[0], skip_special_tokens=True))
 
+```
+## Load as a base model
+
+```python
+from transformers import AutoModel, AutoTokenizer
+
+tokenizer = AutoTokenizer.from_pretrained(
+    "Harikrish2727/BetterGPT-150M",
+    trust_remote_code=True
+)
+
+model = AutoModel.from_pretrained(
+    "Harikrish2727/BetterGPT-150M",
+    trust_remote_code=True
+)
 ```
 
 ---

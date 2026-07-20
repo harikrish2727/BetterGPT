@@ -11,12 +11,12 @@ if __name__ == "__main__":
     from configs.configuration_bettergpt import BetterGPTConfig
     from src.models.modeling_bettergpt import BetterGPT
     from src.models.base_model import BetterGPTModel
-    from src.utils.paths import HUB_DIR
+    from src.utils.paths import HUB_DIR, CHECKPOINT_DIR
 
 
 
-    ckpt_path = "./checkpoints/checkpoint_final.pt"   #wherever final pretrained model is, which is a .pt file for my case
-    out_dir   = HUB_DIR                        #to huggingface safetensors format
+    ckpt_path = CHECKPOINT_DIR/"checkpoint_final.pt"   #wherever final pretrained model is, which is a .pt file for my case
+    out_dir   = HUB_DIR/"test2"                    #to huggingface safetensors format
 
     device = "cuda" if torch.cuda.is_available() else "cpu"
 
@@ -36,7 +36,6 @@ if __name__ == "__main__":
 
     
     model.load_state_dict(state, strict=True)
-    print(f"failed to load state dict {e}")
 
     # refuse to save an untrained model
     g = model.model.rmsnorm.gamma
@@ -44,7 +43,6 @@ if __name__ == "__main__":
 
     
     model.save_pretrained(out_dir)
-    print(f"model saving in safetensors format failed {e}")
 
 
     sd = load_file(f"{out_dir}/model.safetensors")

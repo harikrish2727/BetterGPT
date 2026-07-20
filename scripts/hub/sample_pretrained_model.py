@@ -11,63 +11,52 @@ import torch
 from transformers import AutoModelForCausalLM, AutoTokenizer
 
 
-def load_tokenizer(path):
-    try:
-        tokenizer = AutoTokenizer.from_pretrained(
-            path,
-            trust_remote_code=True,
-            torch_dtype="auto",
-            device_map="auto")
-        return tokenizer
-    
-    except Exception as e:
-        print(f"error loading tokenizer {e}")
-
-def tokenize(text,tokenizer):
-    return tokenizer(text)["input_ids"]
-        
-
-def load_model(path):
-    try:
-        model = AutoModelForCausalLM.from_pretrained(path,trust_remote_code=True)
-        model = model.to(device)
-        return model
-    except Exception as e:
-        print("failed loading model")
-        return (e)
-
-
-
-def predict(ids,model,tokenizer,max_new_tokens=100):
-    model.eval()
-    with torch.no_grad():
-        outputs = model.generate(
-            ids,
-            max_new_tokens=max_new_tokens,
-            do_sample=True,
-            temperature=0.7,
-            top_p=0.9,
-            repetition_penalty=1.15,
-            eos_token_id=tokenizer.eos_token_id,
-            pad_token_id=tokenizer.pad_token_id
-        )
-    return tokenizer.decode(outputs[0],skip_special_tokens=True)
-
-
 
 if __name__ =="__main__":
-    from src.utils.paths import CHECKPOINT_DIR,TOKENIZER_DIR
+
+    from src.utils.paths import HUB_DIR
 
     device = "cuda" if torch.cuda.is_available() else "cpu"
-    path = CHECKPOINT_DIR
+    path = HUB_DIR
 
-    model = load_model(path)
-    tokenizer = load_tokenizer(path)
+    from transformers import AutoTokenizer, AutoModelForCausalLM, AutoModel
 
-    text = "The "
+    model_head = AutoModel.from_pretrained(
+        path,
+        trust_remote_code=True
+        )
 
-    ids = tokenize(text,tokenizer)
+    tokenizer = AutoTokenizer.from_pretrained(
+        path,
+        trust_remote_code=True
+    )
 
-    model_response = predict(ids,model,tokenizer,max_new_tokens=100)
+    print("tokenizer loaded")
 
-    print(f"model response:  {model_response}")
+    model = AutoModelForCausalLM.from_pretrained(
+        path,
+        trust_remote_code=True,
+        device_map="auto"
+    )
+
+    print("model loaded")
+
+    ### Generate text
+
+    prompt = "The future of artificial intelligence is"
+
+    inputs = tokenizer(prompt, return_tensors="pt").to(model.device)
+
+
+    outputs = model.generate(
+        **inputs,
+        max_new_tokens=50,
+        do_sample=True,
+        temperature=0.7,
+        top_p=0.9,
+        repetition_penalty=1.15,
+        eos_token_id=tokenizer.eos_token_id,
+        pad_token_id=tokenizer.pad_token_id,
+    )
+
+    print(tokenizer.decode(outputs[0], skip_special_tokens=True))

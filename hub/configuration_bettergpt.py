@@ -35,21 +35,3 @@ class BetterGPTConfig(PretrainedConfig):
 
         # Initialize the Hugging Face base config
         super().__init__(tie_word_embeddings=tie_word_embeddings, **kwargs)
-
-
-
-    @property
-    def hidden_size(self):
-        return self.emb_dim
-
-    @property
-    def num_attention_heads(self):
-        return self.head_count
-
-    @property
-    def num_hidden_layers(self):
-        return self.num_blocks
-
-    @property
-    def max_position_embeddings(self):
-        return self.seq_length
