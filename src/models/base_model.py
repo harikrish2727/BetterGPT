@@ -8,7 +8,7 @@ from transformers.modeling_outputs import BaseModelOutputWithPast
 from src.models.transformer_block import TransformerBlock
 from src.models.positional_embeddings import RoPESplitHalf
 from src.models.layer_normalization import RMSNorm
-from configs.model import BetterGPTConfig
+from configs.configuration_bettergpt import BetterGPTConfig
 from src.utils.logger import get_logger
 
 logger = get_logger(__name__)
