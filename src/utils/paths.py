@@ -14,3 +14,5 @@ FINETUNE_OUT_DIR = ROOT_DIR / "checkpoints" / "finetuned_model_files"
 
 LOG_DIR = ROOT_DIR / "logs"
 
+HUB_DIR = ROOT_DIR/ "hub"
+

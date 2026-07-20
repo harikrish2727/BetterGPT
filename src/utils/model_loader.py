@@ -1,7 +1,7 @@
 import torch
 
-from src.models.model import BetterGPT
-from configs.model import BetterGPTConfig as ModelConfig
+from models.modeling_bettergpt import BetterGPT
+from configs.configuration_bettergpt import BetterGPTConfig as ModelConfig
 from src.utils.logger import get_logger
 
 
