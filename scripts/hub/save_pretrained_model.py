@@ -9,7 +9,7 @@ if __name__ == "__main__":
     from safetensors.torch import load_file
 
     from configs.configuration_bettergpt import BetterGPTConfig
-    from src.models.modeling_bettergpt import BetterGPT
+    from src.models.modeling_bettergpt import BetterGPTForCausalLM
     from src.models.base_model import BetterGPTModel
     from src.utils.paths import HUB_DIR, CHECKPOINT_DIR
 
@@ -26,11 +26,11 @@ if __name__ == "__main__":
         print(f"error loading checkpoint {e}")
 
     config = BetterGPTConfig(**ckpt["model_config"])
-    model = BetterGPT(config)
+    model = BetterGPTForCausalLM(config)
 
     BetterGPTConfig.register_for_auto_class()
     BetterGPTModel.register_for_auto_class("AutoModel")
-    BetterGPT.register_for_auto_class("AutoModelForCausalLM")
+    BetterGPTForCausalLM.register_for_auto_class("AutoModelForCausalLM")
 
     state = {k.removeprefix("_orig_mod."): v for k, v in ckpt["model_state"].items()}   #removing compiled key name changes
 

@@ -1,11 +1,11 @@
 {
   "architectures": [
-    "BetterGPT"
+    "BetterGPTForCausalLM"
   ],
   "auto_map": {
     "AutoConfig": "configuration_bettergpt.BetterGPTConfig",
     "AutoModel": "base_model.BetterGPTModel",
-    "AutoModelForCausalLM": "modeling_bettergpt.BetterGPT"
+    "AutoModelForCausalLM": "modeling_bettergpt.BetterGPTForCausalLM"
   },
   "dtype": "float32",
   "emb_dim": 768,

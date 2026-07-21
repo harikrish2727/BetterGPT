@@ -1,5 +1,5 @@
 """
-Fine-tuning script for the pretrained BetterGPT model on the Alpaca dataset.
+Fine-tuning script for the pretrained BetterGPTForCausalLM on the Alpaca dataset.
 
 """
 

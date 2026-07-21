@@ -13,7 +13,7 @@ from .logger import get_logger
 logger = get_logger(__name__)
 
 
-class BetterGPT(PreTrainedModel, GenerationMixin):
+class BetterGPTForCausalLM(PreTrainedModel, GenerationMixin):
     """
     A small decoder-only language model adapted for Hugging Face Trainer compatibility.
     """
@@ -121,48 +121,3 @@ class BetterGPT(PreTrainedModel, GenerationMixin):
             loss=loss,
             logits=logits,
         )
-
-    @torch.no_grad()
-    def custom_generate(self, idx, max_tokens, temp, top_k=None, eos_id=None):
-        """
-        Custom generation loop for the BetterGPT model.
-        Args:
-            idx: Tensor of shape (B, T) containing initial token IDs.
-            max_tokens: Maximum number of tokens to generate.
-            temp: Sampling temperature; 0 for greedy decoding.
-            top_k: Optional integer for top-k sampling.
-            eos_id: Optional ID of the end-of-sequence token.
-        """
-        self.eval()
-        B = idx.size(0)
-        finished = torch.zeros(B, 1, dtype=torch.bool, device=idx.device)
-        for _ in range(max_tokens):
-            idx_cond = idx[:, -self.seq_length :]
-            # changed forward, so extract logits from the returned object
-            logits = self(input_ids=idx_cond).logits[:, -1, :]
-
-            if temp == 0:
-                out_idx = torch.argmax(logits, dim=-1, keepdim=True)
-            else:
-                logits = logits / temp
-                if top_k is not None:
-                    k = min(top_k, logits.size(-1))
-                    val, _ = torch.topk(logits, k)
-                    min_val = val[:, -1].unsqueeze(-1)
-                    logits = logits.masked_fill(logits < min_val, float("-inf"))
-                probs = F.softmax(logits, dim=-1)
-                out_idx = torch.multinomial(probs, num_samples=1)
-
-            if eos_id is not None:
-                out_idx = torch.where(
-                    finished, torch.full_like(out_idx, eos_id), out_idx
-                )
-                finished = finished | (out_idx == eos_id)
-
-            idx = torch.cat([idx, out_idx], dim=1)
-
-            if eos_id is not None and finished.all():
-                break
-
-        return idx
-    

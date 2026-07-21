@@ -1,6 +1,6 @@
 import torch
 
-from models.modeling_bettergpt import BetterGPT
+from models.modeling_bettergpt import BetterGPTForCausalLM
 from configs.configuration_bettergpt import BetterGPTConfig as ModelConfig
 from src.utils.logger import get_logger
 
@@ -8,7 +8,7 @@ from src.utils.logger import get_logger
 logger = get_logger(__name__)
 
 def load_model(saved_model_path, tokenizer):
-    model = BetterGPT(ModelConfig())
+    model = BetterGPTForCausalLM(ModelConfig())
     ckpt = torch.load(
         saved_model_path, map_location="cpu", weights_only=True
     )

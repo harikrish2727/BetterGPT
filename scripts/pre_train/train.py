@@ -5,7 +5,7 @@ from torch.utils.data import DataLoader
 from torch.optim.lr_scheduler import LambdaLR
 
 
-from models.modeling_bettergpt import BetterGPT
+from models.modeling_bettergpt import BetterGPTForCausalLM
 from src.pretraining.pretrainer import training
 from src.data_preparation.pretrainer_dataloader import (stable_train_loader,
                                                         stable_val_loader,
@@ -27,7 +27,7 @@ GRAD_ACCUM_STEPS = TrainingConfig.grad_accum_steps
 if __name__ == "__main__":
     # 1. Model Initialization
     model_config = BetterGPTConfig()
-    model = BetterGPT(model_config)
+    model = BetterGPTForCausalLM(model_config)
     model = torch.compile(model)
     total_params = sum(p.numel() for p in model.parameters())
     logger.info("Model initialized | parameters=%dM", total_params // 1_000_000)

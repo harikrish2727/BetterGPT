@@ -3,7 +3,7 @@ from jinja2 import TemplateError
 
 from transformers import AutoConfig, AutoModelForCausalLM, AutoTokenizer
 
-from models.modeling_bettergpt import BetterGPT
+from models.modeling_bettergpt import BetterGPTForCausalLM
 from src.utils.paths import FINETUNE_OUT_DIR
 from configs.configuration_bettergpt import BetterGPTConfig
 from src.utils.logger import get_logger
@@ -51,7 +51,7 @@ def generate(ids:torch.tensor):
 if __name__ == "__main__":
 
     AutoConfig.register(model_type="better_gpt",config=BetterGPTConfig)  #register config
-    AutoModelForCausalLM.register(BetterGPTConfig,BetterGPT)  #register model
+    AutoModelForCausalLM.register(BetterGPTConfig,BetterGPTForCausalLM)  #register model
 
     model = AutoModelForCausalLM.from_pretrained(alpaca_path)
     tokenizer = AutoTokenizer.from_pretrained(alpaca_path)

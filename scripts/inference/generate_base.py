@@ -8,7 +8,7 @@ from transformers import PreTrainedTokenizerFast
 
 from configs.configuration_bettergpt import BetterGPTConfig as ModelConfig
 from configs.training import TrainingConfig
-from models.modeling_bettergpt import BetterGPT
+from models.modeling_bettergpt import BetterGPTForCausalLM
 from src.utils.logger import get_logger
 from src.utils.paths import CHECKPOINT_DIR, TOKENIZER_DIR
 
@@ -48,7 +48,7 @@ def load_and_predict(text, device, max_tokens=100, temp=0.4, top_k=7, stop_at_eo
     )  # check this call works for fast tokenizer
 
     ckpt = torch.load(model_path, map_location=device, weights_only=True)
-    model = BetterGPT(ModelConfig(**ckpt["model_config"]))
+    model = BetterGPTForCausalLM(ModelConfig(**ckpt["model_config"]))
     model.load_state_dict(ckpt["model_state"])
     model = model.to(device)
     logger.info(

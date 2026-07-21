@@ -1,3 +1,7 @@
+"""
+this script push the model.safetensors and other files to HuggingFace hub
+"""
+
 from src.utils.paths import HUB_DIR
 from huggingface_hub import login, upload_folder
 

@@ -19,7 +19,9 @@ class BetterGPTModel(PreTrainedModel):
     This model is designed for efficient training and inference, supporting gradient checkpointing"""
 
     config_class = BetterGPTConfig
+    base_model_prefix = "model"
     supports_gradient_checkpointing = True
+    keys_to_ignore_at_inference = ["past_key_values"]
 
     def __init__(self, config: BetterGPTConfig):
         super().__init__(config)
@@ -47,6 +49,7 @@ class BetterGPTModel(PreTrainedModel):
                 for _ in range(config.num_blocks)
             ]
         )
+        self.post_init()
 
     def forward(self, input_ids=None, attention_mask=None, **kwargs):
         x = self.emb_layer(input_ids)
