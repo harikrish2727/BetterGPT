@@ -4,6 +4,15 @@ BetterGPT is a personal engineering project to build a modern decoder-only Trans
 
 **Current model: [BetterGPT-150M](https://huggingface.co/Harikrish2727/BetterGPT-150M)** — a 152M-parameter decoder-only Transformer, pretrained from scratch on ~15B tokens, fully Hugging Face-compatible.
 
+# BetterGPT-150M
+
+[![Hugging Face Model](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Model-blue)](https://huggingface.co/Harikrish2727/BetterGPT-150M)
+[![Hugging Face Space](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Space%20Demo-yellow)](https://huggingface.co/spaces/Harikrish2727/BetterGPT-Demo)
+
+## Live Interactive Demo
+Test the model directly using our Hugging Face Space:
+[BetterGPT-150M Space Demo](https://huggingface.co/spaces/Harikrish2727/BetterGPT-Demo)
+
 ---
 
 ## Current Status
